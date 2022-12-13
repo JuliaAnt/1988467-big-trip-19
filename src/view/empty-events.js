@@ -1,17 +1,16 @@
 import { createElement } from '../render.js';
 
-function createEventListEmptyTemplate() {
+function createEmptyEventsTemplate() {
   return '<p class="trip-events__msg">Click New Event to create your first point</p>';
 }
 
-
-export default class EventListEmptyView {
+export default class EmptyEventsView {
   constructor() {
     this.element = null;
   }
 
   getTemplate() {
-    return createEventListEmptyTemplate();
+    return createEmptyEventsTemplate();
   }
 
   getElement() {
