@@ -8,30 +8,36 @@ import NewPointView from './view/new-point.js';
 import LoadingView from './view/loading.js';
 import EmptyEventsView from './view/empty-events.js';
 import { render } from './render.js';
+import PointsModel from './model.js';
+import { offersByType } from './mock/mock-data.js';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
+const pointsModel = new PointsModel();
 
-const NUMBER_OF_EVENTS = 3;
-
-export default class TripPresenter {
+class TripPresenter {
   eventList = new EventsView();
   eventItem = new EventView();
 
-  constructor({ headerContainer, mainContainer }) {
+  constructor({ headerContainer, mainContainer,
+    model
+  }) {
     this.headerContainer = headerContainer;
     this.mainContainer = mainContainer;
+    this.model = model;
   }
 
   init() {
+    this.waypoints = [...this.model.getPoints()];
+
     render(new FiltersView(), this.headerContainer);
     render(new SortsView(), this.mainContainer);
     render(this.eventList, this.mainContainer);
     render(this.eventItem, this.eventList.getElement());
     render(new EditFormView(), this.eventItem.getElement());
 
-    for (let i = 0; i < NUMBER_OF_EVENTS; i++) {
-      render(new WaypointView(), this.eventItem.getElement());
+    for (let i = 0; i < this.waypoints.length; i++) {
+      render(new WaypointView({ offers: offersByType, waypoint: this.waypoints[i] }), this.eventItem.getElement());
     }
 
     render(new NewPointView(), this.eventItem.getElement());
@@ -41,5 +47,10 @@ export default class TripPresenter {
   }
 }
 
-const tripPresenter = new TripPresenter({ headerContainer: tripControlsFilters, mainContainer: tripEvents });
+const tripPresenter = new TripPresenter({
+  headerContainer: tripControlsFilters,
+  mainContainer: tripEvents,
+  model: pointsModel,
+});
+
 tripPresenter.init();
