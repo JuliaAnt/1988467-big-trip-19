@@ -34,13 +34,13 @@ class TripPresenter {
     render(new SortsView(), this.mainContainer);
     render(this.eventList, this.mainContainer);
     render(this.eventItem, this.eventList.getElement());
-    render(new EditFormView(), this.eventItem.getElement());
+    render(new EditFormView({}), this.eventItem.getElement());
 
     for (let i = 0; i < this.waypoints.length; i++) {
       render(new WaypointView({ offers: offersByType, waypoint: this.waypoints[i] }), this.eventItem.getElement());
     }
 
-    render(new NewPointView(), this.eventItem.getElement());
+    render(new NewPointView({}), this.eventItem.getElement());
     render(new LoadingView(), this.mainContainer);
     render(new EmptyEventsView(), this.mainContainer);
 

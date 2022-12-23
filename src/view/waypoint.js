@@ -4,19 +4,14 @@ import { humanizePointDueDate, humanizePointTime, calculateDuration } from '../u
 function createWaypointOffersTemplate(offers, waypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === waypoint.type);
 
-  return pointTypeOffer.offers.map((offer) => {
-    if (waypoint.offers.includes(offer.id)) {
-      return (
-        `<li class="event__offer">
-          <span class="event__offer-title">${offer.title}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${offer.price}</span>
-        </li>`
-      );
-    } else {
-      return '';
-    }
-  }).join('');
+  return pointTypeOffer.offers.map((offer) => (
+    waypoint.offers.includes(offer.id) ? (
+      `<li class="event__offer">
+        <span class="event__offer-title">${offer.title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${offer.price}</span>
+      </li>`
+    ) : '')).join('');
 }
 
 function createWaypointTemplate(offers, waypoint) {

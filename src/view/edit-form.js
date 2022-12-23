@@ -7,51 +7,25 @@ const editPoint = getRandomElement();
 function createOfferListTemplate(offers, newWaypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === newWaypoint.type);
 
-  return pointTypeOffer.offers.map((offer) => {
-    if (newWaypoint.offers.includes(offer.id)) {
-      return (
-        `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" checked>
-        <label class="event__offer-label" for="event-offer-meal-1">
-          <span class="event__offer-title">${offer.title}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${offer.price}</span>
-        </label>
-      </div>`
-      );
-    } else {
-      return (
-        `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal">
-        <label class="event__offer-label" for="event-offer-meal-1">
-          <span class="event__offer-title">${offer.title}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${offer.price}</span>
-        </label>
-      </div>`
-      );
-    }
-  }).join('');
+  return pointTypeOffer.offers.map((offer) => (
+    `<div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${newWaypoint.offers.includes(offer.id) ? 'checked' : ''}>
+      <label class="event__offer-label" for="event-offer-meal-1">
+        <span class="event__offer-title">${offer.title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${offer.price}</span>
+      </label>
+    </div>`
+  )).join('');
 }
 
 function createTypeListTemplate(types, newWaypoint) {
-  return types.map((type) => {
-    if (newWaypoint.type === type) {
-      return (
-        `<div class="event__type-item">
-          <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" checked>
-          <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
-        </div>`
-      );
-    } else {
-      return (
-        `<div class="event__type-item">
-          <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
-          <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
-        </div>`
-      );
-    }
-  }).join('');
+  return types.map((type) => (
+    `<div class="event__type-item">
+      <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${newWaypoint.type === type ? 'checked' : ''}>
+      <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
+    </div>`
+  )).join('');
 }
 
 function createCityListTemplate(availableCities) {
@@ -129,11 +103,7 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-              <img class="event__photo" src="${newWaypoint.destination.pictures[0].src}" alt="${newWaypoint.destination.pictures[0].description}">
-              <img class="event__photo" src="${newWaypoint.destination.pictures[1].src}" alt="${newWaypoint.destination.pictures[1].description}">
-              <img class="event__photo" src="${newWaypoint.destination.pictures[2].src}" alt="${newWaypoint.destination.pictures[2].description}">
-              <img class="event__photo" src="${newWaypoint.destination.pictures[3].src}" alt="${newWaypoint.destination.pictures[3].description}">
-              <img class="event__photo" src="${newWaypoint.destination.pictures[4].src}" alt="${newWaypoint.destination.pictures[4].description}">
+              ${newWaypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
             </div>
           </div>
         </section>
@@ -143,11 +113,11 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
 }
 
 export default class EditFormView {
-  constructor(newWaypoint, types, availableCities, offers) {
-    this.newWaypoint = newWaypoint || editPoint;
-    this.types = types || pointTypes;
-    this.availableCities = availableCities || cities;
-    this.offers = offers || offersByType;
+  constructor({ newWaypoint = editPoint, types = pointTypes, availableCities = cities, offers = offersByType }) {
+    this.newWaypoint = newWaypoint;
+    this.types = types;
+    this.availableCities = availableCities;
+    this.offers = offers;
   }
 
   getTemplate() {
