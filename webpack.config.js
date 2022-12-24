@@ -1,5 +1,6 @@
 const path = require('path');
 const CopyPlagin = require('copy-webpack-plugin');
+const flatpickr = require("flatpickr");
 
 module.exports = {
   entry: './src/main.js',
@@ -7,6 +8,9 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'build'),
     clean: true,
+  },
+  devServer: {
+    watchFiles: ['src/**/*.js', 'public/**/*'],
   },
   devtool: 'source-map',
   plugins: [
