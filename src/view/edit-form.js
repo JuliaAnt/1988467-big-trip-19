@@ -113,26 +113,32 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
 }
 
 export default class EditFormView {
+  #item = null;
+  #newWaypoint = null;
+  #types = null;
+  #availableCities = null;
+  #offers = null;
+
   constructor({ newWaypoint = editPoint, types = pointTypes, availableCities = cities, offers = offersByType }) {
-    this.newWaypoint = newWaypoint;
-    this.types = types;
-    this.availableCities = availableCities;
-    this.offers = offers;
+    this.#newWaypoint = newWaypoint;
+    this.#types = types;
+    this.#availableCities = availableCities;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createEditFormsTemplate(this.newWaypoint, this.types, this.availableCities, this.offers);
+  get template() {
+    return createEditFormsTemplate(this.#newWaypoint, this.#types, this.#availableCities, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#item) {
+      this.#item = createElement(this.template);
     }
 
-    return this.element;
+    return this.#item;
   }
 
   removeElement() {
-    this.element = null;
+    this.#item = null;
   }
 }
