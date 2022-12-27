@@ -4,9 +4,6 @@ import EventsView from './view/event-list.js';
 import WaypointView from './view/waypoint.js';
 import EditFormView from './view/edit-form.js';
 import EventView from './view/event.js';
-// import NewPointView from './view/new-point.js';
-// import LoadingView from './view/loading.js';
-// import EmptyEventsView from './view/empty-events.js';
 import { render } from './render.js';
 import PointsModel from './model.js';
 import { offersByType } from './mock/mock-data.js';
@@ -38,26 +35,51 @@ class TripPresenter {
     render(new SortsView(), this.#mainContainer);
     render(this.#eventList, this.#mainContainer);
     render(this.#eventItem, this.#eventList.element);
-    // render(new EditFormView({}), this.#eventItem.element);
 
     for (let i = 0; i < this.#waypoints.length; i++) {
       this.#renderPoint(offersByType, this.#waypoints[i]);
-      // render(new WaypointView({ offers: offersByType, waypoint: this.#waypoints[i] }), this.#eventItem.element);
     }
-
-    // render(new NewPointView({}), this.#eventItem.element);
-    // render(new LoadingView(), this.#mainContainer);
-    // render(new EmptyEventsView(), this.#mainContainer);
   }
 
   #renderPoint(offers, waypoint) {
     const pointListItem = new WaypointView({ offers, waypoint });
     const pointEditItem = new EditFormView({});
 
-    render(pointListItem, this.#eventItem.element);
-    render(pointEditItem, this.#eventItem.element);
-  }
+    const replaceWaypointToEdit = () => {
+      this.#eventItem.element.replaceChild(pointEditItem.element, pointListItem.element);
+    };
 
+    const replaceEditToWaypoint = () => {
+      this.#eventItem.element.replaceChild(pointListItem.element, pointEditItem.element);
+    };
+
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceEditToWaypoint();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+
+    pointListItem.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replaceWaypointToEdit();
+      document.addEventListener('keydown', escKeyDownHandler);
+    });
+
+    // pointEditItem.element.querySelector('.event__save-btn').addEventListener('click', (evt) => {
+    //   evt.preventDefault();
+    //   replaceEditToWaypoint();
+    //   document.removeEventListener('keydown', escKeyDownHandler);
+    // });
+
+    pointEditItem.element.querySelector('form').addEventListener('submit', (evt) => {
+      evt.preventDefault();
+      replaceEditToWaypoint();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    });
+
+    render(pointListItem, this.#eventItem.element);
+  }
 }
 
 const tripPresenter = new TripPresenter({
