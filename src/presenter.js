@@ -6,7 +6,7 @@ import EditFormView from './view/edit-form.js';
 import EventView from './view/event.js';
 import { render } from './render.js';
 import PointsModel from './model.js';
-import { offersByType } from './mock/mock-data.js';
+import { offersByType, pointTypes, cities } from './mock/mock-data.js';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
@@ -37,13 +37,20 @@ class TripPresenter {
     render(this.#eventItem, this.#eventList.element);
 
     for (let i = 0; i < this.#waypoints.length; i++) {
-      this.#renderPoint(offersByType, this.#waypoints[i]);
+      const props = {
+        waypoint: this.#waypoints[i],
+        types: pointTypes,
+        availableCities: cities,
+        offers: offersByType,
+      };
+      this.#renderPoint(props);
     }
   }
 
-  #renderPoint(offers, waypoint) {
-    const pointListItem = new WaypointView({ offers, waypoint });
-    const pointEditItem = new EditFormView({});
+  #renderPoint(props) {
+
+    const pointListItem = new WaypointView(props);
+    const pointEditItem = new EditFormView(props);
 
     const replaceWaypointToEdit = () => {
       this.#eventItem.element.replaceChild(pointEditItem.element, pointListItem.element);
