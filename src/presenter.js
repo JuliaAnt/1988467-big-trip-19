@@ -66,13 +66,7 @@ class TripPresenter {
       document.addEventListener('keydown', escKeyDownHandler);
     });
 
-    // pointEditItem.element.querySelector('.event__save-btn').addEventListener('click', (evt) => {
-    //   evt.preventDefault();
-    //   replaceEditToWaypoint();
-    //   document.removeEventListener('keydown', escKeyDownHandler);
-    // });
-
-    pointEditItem.element.querySelector('form').addEventListener('submit', (evt) => {
+    pointEditItem.element.addEventListener('submit', (evt) => {
       evt.preventDefault();
       replaceEditToWaypoint();
       document.removeEventListener('keydown', escKeyDownHandler);
