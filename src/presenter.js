@@ -4,46 +4,82 @@ import EventsView from './view/event-list.js';
 import WaypointView from './view/waypoint.js';
 import EditFormView from './view/edit-form.js';
 import EventView from './view/event.js';
-import NewPointView from './view/new-point.js';
-import LoadingView from './view/loading.js';
-import EmptyEventsView from './view/empty-events.js';
 import { render } from './render.js';
 import PointsModel from './model.js';
-import { offersByType } from './mock/mock-data.js';
+import { offersByType, pointTypes, cities } from './mock/mock-data.js';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
 const pointsModel = new PointsModel();
 
 class TripPresenter {
-  eventList = new EventsView();
-  eventItem = new EventView();
+  #headerContainer = null;
+  #mainContainer = null;
+  #model = null;
 
-  constructor({ headerContainer, mainContainer,
-    model
-  }) {
-    this.headerContainer = headerContainer;
-    this.mainContainer = mainContainer;
-    this.model = model;
+  #waypoints = [];
+
+  #eventList = new EventsView();
+  #eventItem = new EventView();
+
+  constructor({ headerContainer, mainContainer, model }) {
+    this.#headerContainer = headerContainer;
+    this.#mainContainer = mainContainer;
+    this.#model = model;
   }
 
   init() {
-    this.waypoints = [...this.model.getPoints()];
+    this.#waypoints = [...this.#model.points];
 
-    render(new FiltersView(), this.headerContainer);
-    render(new SortsView(), this.mainContainer);
-    render(this.eventList, this.mainContainer);
-    render(this.eventItem, this.eventList.getElement());
-    render(new EditFormView({}), this.eventItem.getElement());
+    render(new FiltersView(), this.#headerContainer);
+    render(new SortsView(), this.#mainContainer);
+    render(this.#eventList, this.#mainContainer);
+    render(this.#eventItem, this.#eventList.element);
 
-    for (let i = 0; i < this.waypoints.length; i++) {
-      render(new WaypointView({ offers: offersByType, waypoint: this.waypoints[i] }), this.eventItem.getElement());
+    for (let i = 0; i < this.#waypoints.length; i++) {
+      const props = {
+        waypoint: this.#waypoints[i],
+        types: pointTypes,
+        availableCities: cities,
+        offers: offersByType,
+      };
+      this.#renderPoint(props);
     }
+  }
 
-    render(new NewPointView({}), this.eventItem.getElement());
-    render(new LoadingView(), this.mainContainer);
-    render(new EmptyEventsView(), this.mainContainer);
+  #renderPoint(props) {
 
+    const pointListItem = new WaypointView(props);
+    const pointEditItem = new EditFormView(props);
+
+    const replaceWaypointToEdit = () => {
+      this.#eventItem.element.replaceChild(pointEditItem.element, pointListItem.element);
+    };
+
+    const replaceEditToWaypoint = () => {
+      this.#eventItem.element.replaceChild(pointListItem.element, pointEditItem.element);
+    };
+
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceEditToWaypoint();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+
+    pointListItem.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replaceWaypointToEdit();
+      document.addEventListener('keydown', escKeyDownHandler);
+    });
+
+    pointEditItem.element.addEventListener('submit', (evt) => {
+      evt.preventDefault();
+      replaceEditToWaypoint();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    });
+
+    render(pointListItem, this.#eventItem.element);
   }
 }
 

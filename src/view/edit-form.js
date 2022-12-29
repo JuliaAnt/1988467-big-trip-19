@@ -1,15 +1,12 @@
 import { createElement } from '../render.js';
 import { humanizePointDateAndTime } from '../utils.js';
-import { pointTypes, cities, offersByType, getRandomElement } from '../mock/mock-data.js';
 
-const editPoint = getRandomElement();
-
-function createOfferListTemplate(offers, newWaypoint) {
-  const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === newWaypoint.type);
+function createOfferListTemplate(offers, waypoint) {
+  const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === waypoint.type);
 
   return pointTypeOffer.offers.map((offer) => (
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${newWaypoint.offers.includes(offer.id) ? 'checked' : ''}>
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${waypoint.offers.includes(offer.id) ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offer-meal-1">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -19,10 +16,10 @@ function createOfferListTemplate(offers, newWaypoint) {
   )).join('');
 }
 
-function createTypeListTemplate(types, newWaypoint) {
+function createTypeListTemplate(types, waypoint) {
   return types.map((type) => (
     `<div class="event__type-item">
-      <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${newWaypoint.type === type ? 'checked' : ''}>
+      <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${waypoint.type === type ? 'checked' : ''}>
       <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
     </div>`
   )).join('');
@@ -34,12 +31,12 @@ function createCityListTemplate(availableCities) {
   )).join('');
 }
 
-function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
-  const typeList = createTypeListTemplate(types, newWaypoint);
+function createEditFormsTemplate(waypoint, types, availableCities, offers) {
+  const typeList = createTypeListTemplate(types, waypoint);
   const cityList = createCityListTemplate(availableCities);
-  const offerList = createOfferListTemplate(offers, newWaypoint);
-  const dateFrom = humanizePointDateAndTime(newWaypoint.date_from);
-  const dateTo = humanizePointDateAndTime(newWaypoint.date_to);
+  const offerList = createOfferListTemplate(offers, waypoint);
+  const dateFrom = humanizePointDateAndTime(waypoint.date_from);
+  const dateTo = humanizePointDateAndTime(waypoint.date_to);
 
   return (
     `<form class="event event--edit" action="#" method="post">
@@ -47,7 +44,7 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${newWaypoint.type}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${waypoint.type}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -61,9 +58,9 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-1">
-            ${newWaypoint.type}
+            ${waypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${newWaypoint.destination.name}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${waypoint.destination.name}" list="destination-list-2">
           <datalist id="destination-list-2">
           ${cityList}
           </datalist>
@@ -82,7 +79,7 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${newWaypoint.base_price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${waypoint.base_price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -99,11 +96,11 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
 
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${newWaypoint.destination.description}</p>
+          <p class="event__destination-description">${waypoint.destination.description}</p>
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-              ${newWaypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+              ${waypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
             </div>
           </div>
         </section>
@@ -113,26 +110,32 @@ function createEditFormsTemplate(newWaypoint, types, availableCities, offers) {
 }
 
 export default class EditFormView {
-  constructor({ newWaypoint = editPoint, types = pointTypes, availableCities = cities, offers = offersByType }) {
-    this.newWaypoint = newWaypoint;
-    this.types = types;
-    this.availableCities = availableCities;
-    this.offers = offers;
+  #item = null;
+  #waypoint = null;
+  #types = null;
+  #availableCities = null;
+  #offers = null;
+
+  constructor({ waypoint, types, availableCities, offers }) {
+    this.#waypoint = waypoint;
+    this.#types = types;
+    this.#availableCities = availableCities;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createEditFormsTemplate(this.newWaypoint, this.types, this.availableCities, this.offers);
+  get template() {
+    return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#item) {
+      this.#item = createElement(this.template);
     }
 
-    return this.element;
+    return this.#item;
   }
 
   removeElement() {
-    this.element = null;
+    this.#item = null;
   }
 }

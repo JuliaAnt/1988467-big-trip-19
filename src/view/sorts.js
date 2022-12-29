@@ -32,23 +32,21 @@ function createSortsTemplate() {
 }
 
 export default class SortsView {
-  constructor() {
-    this.element = null;
-  }
+  #item = null;
 
-  getTemplate() {
+  get template() {
     return createSortsTemplate();
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#item) {
+      this.#item = createElement(this.template);
     }
 
-    return this.element;
+    return this.#item;
   }
 
   removeElement() {
-    this.element = null;
+    this.#item = null;
   }
 }
