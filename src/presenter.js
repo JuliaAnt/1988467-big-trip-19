@@ -67,6 +67,12 @@ class TripPresenter {
       document.removeEventListener('keydown', escKeyDownHandler);
     });
 
+    pointEditItem.element.addEventListener('reset', (evt) => {
+      evt.preventDefault();
+      replaceEditToWaypoint();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    });
+
     render(pointListItem, this.#eventItem.element);
   }
 
