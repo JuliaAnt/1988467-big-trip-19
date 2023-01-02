@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanizePointDueDate, humanizePointTime, calculateDuration } from '../utils.js';
 
 function createWaypointOffersTemplate(offers, waypoint) {
@@ -59,29 +59,17 @@ function createWaypointTemplate(offers, waypoint) {
   );
 }
 
-export default class WaypointView {
-  #item = null;
+export default class WaypointView extends AbstractView {
   #offers = null;
   #waypoint = null;
 
   constructor({ offers, waypoint }) {
+    super();
     this.#offers = offers;
     this.#waypoint = waypoint;
   }
 
   get template() {
     return createWaypointTemplate(this.#offers, this.#waypoint);
-  }
-
-  get element() {
-    if (!this.#item) {
-      this.#item = createElement(this.template);
-    }
-
-    return this.#item;
-  }
-
-  removeElement() {
-    this.#item = null;
   }
 }
