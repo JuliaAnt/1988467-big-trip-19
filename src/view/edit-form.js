@@ -114,16 +114,33 @@ export default class EditFormView extends AbstractView {
   #types = null;
   #availableCities = null;
   #offers = null;
+  #handleEditSubmit = null;
+  #handleEditReset = null;
 
-  constructor({ waypoint, types, availableCities, offers }) {
+  constructor({ waypoint, types, availableCities, offers, onEditSubmit, onEditReset }) {
     super();
     this.#waypoint = waypoint;
     this.#types = types;
     this.#availableCities = availableCities;
     this.#offers = offers;
+    this.#handleEditSubmit = onEditSubmit;
+    this.#handleEditReset = onEditReset;
+
+    this.element.addEventListener('submit', this.#editSubmitHandler);
+    this.element.addEventListener('reset', this.#editResetHandler);
   }
 
   get template() {
     return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers);
   }
+
+  #editSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditSubmit();
+  };
+
+  #editResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditReset();
+  };
 }

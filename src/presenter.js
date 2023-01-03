@@ -37,41 +37,58 @@ class TripPresenter {
 
   #renderPoint(props) {
 
-    const pointListItem = new WaypointView(props);
-    const pointEditItem = new EditFormView(props);
+    const pointListItem = new WaypointView({
+      ...props,
+      onClick: () => {
+        replaceWaypointToEdit.call(this);
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
+    });
 
-    const replaceWaypointToEdit = () => {
-      this.#eventItem.element.replaceChild(pointEditItem.element, pointListItem.element);
-    };
-
-    const replaceEditToWaypoint = () => {
-      this.#eventItem.element.replaceChild(pointListItem.element, pointEditItem.element);
-    };
-
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceEditToWaypoint();
+    const pointEditItem = new EditFormView({
+      ...props,
+      onEditSubmit: () => {
+        replaceEditToWaypoint.call(this);
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+      onEditReset: () => {
+        replaceEditToWaypoint.call(this);
         document.removeEventListener('keydown', escKeyDownHandler);
       }
-    };
-
-    pointListItem.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceWaypointToEdit();
-      document.addEventListener('keydown', escKeyDownHandler);
     });
 
-    pointEditItem.element.addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceEditToWaypoint();
-      document.removeEventListener('keydown', escKeyDownHandler);
-    });
+    function replaceWaypointToEdit() {
+      this.#eventItem.element.replaceChild(pointEditItem.element, pointListItem.element);
+    }
 
-    pointEditItem.element.addEventListener('reset', (evt) => {
-      evt.preventDefault();
-      replaceEditToWaypoint();
-      document.removeEventListener('keydown', escKeyDownHandler);
-    });
+    function replaceEditToWaypoint() {
+      this.#eventItem.element.replaceChild(pointListItem.element, pointEditItem.element);
+    }
+
+    function escKeyDownHandler(evt) {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceEditToWaypoint.call(this);
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    }
+
+    // pointListItem.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    //   replaceWaypointToEdit();
+    //   document.addEventListener('keydown', escKeyDownHandler);
+    // });
+
+    // pointEditItem.element.addEventListener('submit', (evt) => {
+    //   evt.preventDefault();
+    //   replaceEditToWaypoint();
+    //   document.removeEventListener('keydown', escKeyDownHandler);
+    // });
+
+    // pointEditItem.element.addEventListener('reset', (evt) => {
+    //   evt.preventDefault();
+    //   replaceEditToWaypoint();
+    //   document.removeEventListener('keydown', escKeyDownHandler);
+    // });
 
     render(pointListItem, this.#eventItem.element);
   }

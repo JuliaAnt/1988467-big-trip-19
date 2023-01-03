@@ -1,5 +1,5 @@
-
 import AbstractView from '../framework/view/abstract-view.js';
+
 function createEventsTemplate() {
   return '<ul class="trip-events__list"></ul>';
 }
