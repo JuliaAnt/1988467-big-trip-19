@@ -4,7 +4,7 @@ import EventsView from './view/event-list.js';
 import WaypointView from './view/waypoint.js';
 import EditFormView from './view/edit-form.js';
 import EventView from './view/event.js';
-import { render } from './render.js';
+import { render, replace } from './framework/render.js';
 import PointsModel from './model.js';
 import EmptyEventsView from './view/empty-events.js';
 import { offersByType, pointTypes, cities } from './mock/mock-data.js';
@@ -58,11 +58,11 @@ class TripPresenter {
     });
 
     function replaceWaypointToEdit() {
-      this.#eventItem.element.replaceChild(pointEditItem.element, pointListItem.element);
+      replace(pointEditItem, pointListItem);
     }
 
     function replaceEditToWaypoint() {
-      this.#eventItem.element.replaceChild(pointListItem.element, pointEditItem.element);
+      replace(pointListItem, pointEditItem);
     }
 
     function escKeyDownHandler(evt) {
@@ -72,23 +72,6 @@ class TripPresenter {
         document.removeEventListener('keydown', escKeyDownHandler);
       }
     }
-
-    // pointListItem.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-    //   replaceWaypointToEdit();
-    //   document.addEventListener('keydown', escKeyDownHandler);
-    // });
-
-    // pointEditItem.element.addEventListener('submit', (evt) => {
-    //   evt.preventDefault();
-    //   replaceEditToWaypoint();
-    //   document.removeEventListener('keydown', escKeyDownHandler);
-    // });
-
-    // pointEditItem.element.addEventListener('reset', (evt) => {
-    //   evt.preventDefault();
-    //   replaceEditToWaypoint();
-    //   document.removeEventListener('keydown', escKeyDownHandler);
-    // });
 
     render(pointListItem, this.#eventItem.element);
   }
