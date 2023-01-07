@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
 
 function createOfferListTemplate(offers, waypoint) {
@@ -109,33 +109,38 @@ function createEditFormsTemplate(waypoint, types, availableCities, offers) {
   );
 }
 
-export default class EditFormView {
-  #item = null;
+export default class EditFormView extends AbstractView {
   #waypoint = null;
   #types = null;
   #availableCities = null;
   #offers = null;
+  #handleEditSubmit = null;
+  #handleEditReset = null;
 
-  constructor({ waypoint, types, availableCities, offers }) {
+  constructor({ waypoint, types, availableCities, offers, onEditSubmit, onEditReset }) {
+    super();
     this.#waypoint = waypoint;
     this.#types = types;
     this.#availableCities = availableCities;
     this.#offers = offers;
+    this.#handleEditSubmit = onEditSubmit;
+    this.#handleEditReset = onEditReset;
+
+    this.element.addEventListener('submit', this.#editSubmitHandler);
+    this.element.addEventListener('reset', this.#editResetHandler);
   }
 
   get template() {
     return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers);
   }
 
-  get element() {
-    if (!this.#item) {
-      this.#item = createElement(this.template);
-    }
+  #editSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditSubmit();
+  };
 
-    return this.#item;
-  }
-
-  removeElement() {
-    this.#item = null;
-  }
+  #editResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditReset();
+  };
 }

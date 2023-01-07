@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
 import { pointTypes, cities, destinations, offersByType } from '../mock/mock-data.js';
 
@@ -121,14 +121,14 @@ function createNewPointTemplate(newWaypoint, types, availableCities, offers) {
   );
 }
 
-export default class NewPointView {
-  #item = null;
+export default class NewPointView extends AbstractView {
   #newWaypoint = null;
   #types = null;
   #availableCities = null;
   #offers = null;
 
   constructor({ newWaypoint = BLANK_POINT, types = pointTypes, availableCities = cities, offers = offersByType }) {
+    super();
     this.#newWaypoint = newWaypoint;
     this.#types = types;
     this.#availableCities = availableCities;
@@ -137,18 +137,6 @@ export default class NewPointView {
 
   get template() {
     return createNewPointTemplate(this.#newWaypoint, this.#types, this.#availableCities, this.#offers);
-  }
-
-  get element() {
-    if (!this.#item) {
-      this.#item = createElement(this.template);
-    }
-
-    return this.#item;
-  }
-
-  removeElement() {
-    this.#item = null;
   }
 }
 
