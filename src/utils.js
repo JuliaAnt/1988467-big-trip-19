@@ -42,4 +42,8 @@ const getRandomPositiveInteger = (a, b) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-export { getRandomArrayElement, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime };
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export { getRandomArrayElement, updateItem, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime };

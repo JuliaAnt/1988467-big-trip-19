@@ -7,9 +7,11 @@ export default class PointPresenter {
   #pointListItem = null;
   #pointEditItem = null;
   #props = null;
+  #handleDataChange = null;
 
-  constructor({ pointListContainer }) {
+  constructor({ pointListContainer, onDataChange }) {
     this.#pointListContainer = pointListContainer;
+    this.#handleDataChange = onDataChange;
   }
 
   init(props) {
@@ -22,6 +24,9 @@ export default class PointPresenter {
       ...this.#props,
       onClick: () => {
         this.#handleEditClick();
+      },
+      onFavoriteClick: (waypoint) => {
+        this.#handleFavoriteClick(waypoint);
       }
     });
 
@@ -57,6 +62,8 @@ export default class PointPresenter {
     remove(this.#pointEditItem);
   }
 
+  get props() { return this.#props; }
+
 
   #replaceWaypointToEdit() {
     replace(this.#pointEditItem, this.#pointListItem);
@@ -68,18 +75,24 @@ export default class PointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  #escKeyDownHandler(evt) {
+  #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      this.#replaceEditToWaypoint.call(this);
+      this.#replaceEditToWaypoint();
     }
-  }
+  };
 
   #handleEditClick = () => {
     this.#replaceWaypointToEdit();
   };
 
-  #handleEditSubmit = () => {
+  #handleFavoriteClick = (waypoint) => {
+    const updatedPoint = { ...waypoint, ['is_favorite']: !waypoint.is_favorite };
+    this.#handleDataChange(updatedPoint);
+  };
+
+  #handleEditSubmit = (props) => {
+    this.#handleDataChange(props);
     this.#replaceEditToWaypoint();
   };
 

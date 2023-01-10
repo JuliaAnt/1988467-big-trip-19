@@ -7,6 +7,7 @@ import PointsModel from './model.js';
 import EmptyEventsView from './view/empty-events.js';
 import { offersByType, pointTypes, cities } from './mock/mock-data.js';
 import PointPresenter from './point-presenter.js';
+import { updateItem } from './utils.js';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
@@ -46,22 +47,30 @@ class TripPresenter {
     render(this.#sortComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
   }
 
+  #handlePointChange = (updatedPoint) => {
+    this.#waypoints = updateItem(this.#waypoints, updatedPoint);
+    const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
+    const { types, availableCities, offers } = pointPresenter.props;
+    pointPresenter.init({ types, availableCities, offers, waypoint: updatedPoint });
+  };
+
   #renderEmptyEvents() {
     render(this.#emptyEventsComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderPoint(props) {
     const pointPresenter = new PointPresenter({
-      pointListContainer: this.#eventItem.element
+      pointListContainer: this.#eventItem.element,
+      onDataChange: this.#handlePointChange
     });
     pointPresenter.init(props);
-    this.#pointPresenters.set(props.id, pointPresenter);
+    this.#pointPresenters.set(props.waypoint.id, pointPresenter);
   }
 
   #renderPoints() {
     this.#waypoints.forEach((waypoint) => {
       const props = {
-        waypoint: waypoint,
+        waypoint,
         types: pointTypes,
         availableCities: cities,
         offers: offersByType,

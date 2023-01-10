@@ -136,7 +136,7 @@ export default class EditFormView extends AbstractView {
 
   #editSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditSubmit();
+    this.#handleEditSubmit(this.#waypoint);
   };
 
   #editResetHandler = (evt) => {
