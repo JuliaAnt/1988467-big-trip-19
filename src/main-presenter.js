@@ -1,8 +1,6 @@
 import FiltersView from './view/filters.js';
 import SortsView from './view/sorts.js';
 import EventsView from './view/event-list.js';
-// import WaypointView from './view/waypoint.js';
-// import EditFormView from './view/edit-form.js';
 import EventView from './view/event.js';
 import { render, RenderPosition } from './framework/render.js';
 import PointsModel from './model.js';
@@ -20,6 +18,7 @@ class TripPresenter {
   #model = null;
 
   #waypoints = [];
+  #pointPresenters = new Map();
 
   #eventList = new EventsView();
   #eventItem = new EventView();
@@ -56,44 +55,7 @@ class TripPresenter {
       pointListContainer: this.#eventItem.element
     });
     pointPresenter.init(props);
-
-    //   const pointListItem = new WaypointView({
-    //     ...props,
-    //     onClick: () => {
-    //       replaceWaypointToEdit.call(this);
-    //       document.addEventListener('keydown', escKeyDownHandler);
-    //     }
-    //   });
-
-    //   const pointEditItem = new EditFormView({
-    //     ...props,
-    //     onEditSubmit: () => {
-    //       replaceEditToWaypoint.call(this);
-    //       document.removeEventListener('keydown', escKeyDownHandler);
-    //     },
-    //     onEditReset: () => {
-    //       replaceEditToWaypoint.call(this);
-    //       document.removeEventListener('keydown', escKeyDownHandler);
-    //     }
-    //   });
-
-    //   function replaceWaypointToEdit() {
-    //     replace(pointEditItem, pointListItem);
-    //   }
-
-    //   function replaceEditToWaypoint() {
-    //     replace(pointListItem, pointEditItem);
-    //   }
-
-    //   function escKeyDownHandler(evt) {
-    //     if (evt.key === 'Escape' || evt.key === 'Esc') {
-    //       evt.preventDefault();
-    //       replaceEditToWaypoint.call(this);
-    //       document.removeEventListener('keydown', escKeyDownHandler);
-    //     }
-    //   }
-
-    //   render(pointListItem, this.#eventItem.element);
+    this.#pointPresenters.set(props.id, pointPresenter);
   }
 
   #renderPoints() {
@@ -106,6 +68,11 @@ class TripPresenter {
       };
       this.#renderPoint(props);
     });
+  }
+
+  #clearEventList() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
   }
 
   #renderEventList() {

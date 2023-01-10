@@ -1,4 +1,5 @@
 import { getRandomArrayElement, getRandomPositiveInteger } from '../utils.js';
+import { nanoid } from 'nanoid';
 
 const COUNT_OF_PHOTO = 100;
 
@@ -404,7 +405,12 @@ const mockPoints = [
   }
 ];
 
-const getRandomElement = () => getRandomArrayElement(mockPoints);
+function getRandomElement() {
+  return {
+    id: nanoid(),
+    ...getRandomArrayElement(mockPoints)
+  };
+}
 
 export { getRandomElement, offersByType, pointTypes, destinations, cities };
 
