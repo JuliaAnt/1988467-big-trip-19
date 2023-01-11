@@ -2,16 +2,24 @@ import { render, replace, remove } from './framework/render.js';
 import EditFormView from './view/edit-form.js';
 import WaypointView from './view/waypoint.js';
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING'
+};
+
 export default class PointPresenter {
   #pointListContainer = null;
   #pointListItem = null;
   #pointEditItem = null;
   #props = null;
   #handleDataChange = null;
+  #handleModeChange = null;
+  #mode = Mode.DEFAULT;
 
-  constructor({ pointListContainer, onDataChange }) {
+  constructor({ pointListContainer, onDataChange, onModeChange }) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
+    this.#handleModeChange = onModeChange;
   }
 
   init(props) {
@@ -45,11 +53,11 @@ export default class PointPresenter {
       return;
     }
 
-    if (this.#pointListContainer.contains(prevPointListItem.element)) {
+    if (this.#mode === Mode.DEFAULT) {
       replace(this.#pointListItem, prevPointListItem);
     }
 
-    if (this.#pointListContainer.contains(prevPointEditItem.element)) {
+    if (this.#mode === Mode.EDITING) {
       replace(this.#pointEditItem, prevPointEditItem);
     }
 
@@ -62,17 +70,26 @@ export default class PointPresenter {
     remove(this.#pointEditItem);
   }
 
+  resetView() {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#replaceEditToWaypoint();
+    }
+  }
+
   get props() { return this.#props; }
 
 
   #replaceWaypointToEdit() {
     replace(this.#pointEditItem, this.#pointListItem);
     document.addEventListener('keydown', this.#escKeyDownHandler);
+    this.#handleModeChange();
+    this.#mode = Mode.EDITING;
   }
 
   #replaceEditToWaypoint() {
     replace(this.#pointListItem, this.#pointEditItem);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#mode = Mode.DEFAULT;
   }
 
   #escKeyDownHandler = (evt) => {

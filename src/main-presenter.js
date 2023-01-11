@@ -47,6 +47,10 @@ class TripPresenter {
     render(this.#sortComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
   }
 
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #handlePointChange = (updatedPoint) => {
     this.#waypoints = updateItem(this.#waypoints, updatedPoint);
     const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
@@ -61,7 +65,8 @@ class TripPresenter {
   #renderPoint(props) {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#eventItem.element,
-      onDataChange: this.#handlePointChange
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange
     });
     pointPresenter.init(props);
     this.#pointPresenters.set(props.waypoint.id, pointPresenter);
