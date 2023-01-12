@@ -48,7 +48,7 @@ class TripPresenter {
   }
 
   #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.replaceView());
+    this.#pointPresenters.forEach((presenter) => presenter.setDefaultMode());
   };
 
   #handlePointChange = (updatedPoint) => {

@@ -69,7 +69,7 @@ export default class PointPresenter {
     remove(this.#pointEditItem);
   }
 
-  replaceView() {
+  setDefaultMode() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#replaceEditToWaypoint();
     }
