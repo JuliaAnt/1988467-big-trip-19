@@ -358,7 +358,7 @@ const mockPoints = [
   {
     'base_price': getRandomPositiveInteger(10, 1500),
     'date_from': '2019-08-10T22:55:56.845Z',
-    'date_to': '2019-08-11T11:22:13.375Z',
+    'date_to': '2019-08-12T11:22:13.375Z',
     get destination() {
       return destinations[this.id - 1];
     },

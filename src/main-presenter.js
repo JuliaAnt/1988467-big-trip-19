@@ -2,12 +2,13 @@ import FiltersView from './view/filters.js';
 import SortsView from './view/sorts.js';
 import EventsView from './view/event-list.js';
 import EventView from './view/event.js';
-import { render, RenderPosition } from './framework/render.js';
+import { remove, render, RenderPosition } from './framework/render.js';
 import PointsModel from './model.js';
 import EmptyEventsView from './view/empty-events.js';
 import { offersByType, pointTypes, cities } from './mock/mock-data.js';
 import PointPresenter from './point-presenter.js';
-import { updateItem } from './utils.js';
+import { updateItem, sortDayDesc, sortTimeDesc, sortPriceDesc } from './utils.js';
+import { SortType } from './view/sorts.js';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
@@ -20,11 +21,13 @@ class TripPresenter {
 
   #waypoints = [];
   #pointPresenters = new Map();
+  #currentSortType = SortType.DEFAULT;
+  #soursedWaypoints = [];
 
   #eventList = new EventsView();
   #eventItem = new EventView();
   #filtersComponent = new FiltersView();
-  #sortComponent = new SortsView();
+  #sortComponent = null;
   #emptyEventsComponent = new EmptyEventsView();
 
   constructor({ headerContainer, mainContainer, model }) {
@@ -35,7 +38,7 @@ class TripPresenter {
 
   init() {
     this.#waypoints = [...this.#model.points];
-
+    this.#waypoints.sort(sortDayDesc);
     this.#renderEventList();
   }
 
@@ -43,8 +46,35 @@ class TripPresenter {
     render(this.#filtersComponent, this.#headerContainer, RenderPosition.AFTERBEGIN);
   }
 
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortWaypoints(sortType);
+    this.#clearEventList();
+    this.#renderPoints();
+    this.#renderSort();
+  };
+
   #renderSort() {
+    this.#sortComponent = new SortsView({ currentSortType: this.#currentSortType, onSortTypeChange: this.#handleSortTypeChange });
     render(this.#sortComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #sortWaypoints(sortType) {
+    switch (sortType) {
+      case SortType.TIME_DESC:
+        this.#waypoints.sort(sortTimeDesc);
+        break;
+      case SortType.DEFAULT:
+        this.#waypoints.sort(sortDayDesc);
+        break;
+      case SortType.PRICE_DESC:
+        this.#waypoints.sort(sortPriceDesc);
+    }
+
+    this.#currentSortType = sortType;
   }
 
   #handleModeChange = () => {
@@ -53,6 +83,7 @@ class TripPresenter {
 
   #handlePointChange = (updatedPoint) => {
     this.#waypoints = updateItem(this.#waypoints, updatedPoint);
+    this.#soursedWaypoints = updateItem(this.#soursedWaypoints, updatedPoint);
     const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
     const { types, availableCities, offers } = pointPresenter.props;
     pointPresenter.init({ types, availableCities, offers, waypoint: updatedPoint });
@@ -85,6 +116,7 @@ class TripPresenter {
   }
 
   #clearEventList() {
+    remove(this.#sortComponent);
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
   }
