@@ -48,7 +48,7 @@ class TripPresenter {
   }
 
   #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    this.#pointPresenters.forEach((presenter) => presenter.replaceView());
   };
 
   #handlePointChange = (updatedPoint) => {
@@ -93,8 +93,7 @@ class TripPresenter {
     this.#renderFilters();
 
     if (this.#waypoints.every((waypoint) => waypoint.isArchive)) {
-      this.#renderEmptyEvents();
-      return;
+      return this.#renderEmptyEvents();
     }
 
     this.#renderSort();

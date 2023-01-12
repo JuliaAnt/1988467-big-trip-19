@@ -43,7 +43,7 @@ const getRandomPositiveInteger = (a, b) => {
 };
 
 function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
+  return items.splice(items.findIndex((item) => item.id === update.id), 1, update);
 }
 
 export { getRandomArrayElement, updateItem, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime };
