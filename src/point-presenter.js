@@ -49,8 +49,7 @@ export default class PointPresenter {
     });
 
     if (prevPointListItem === null || prevPointEditItem === null) {
-      render(this.#pointListItem, this.#pointListContainer);
-      return;
+      return render(this.#pointListItem, this.#pointListContainer);
     }
 
     if (this.#mode === Mode.DEFAULT) {
@@ -70,13 +69,15 @@ export default class PointPresenter {
     remove(this.#pointEditItem);
   }
 
-  resetView() {
+  setDefaultMode() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#replaceEditToWaypoint();
     }
   }
 
-  get props() { return this.#props; }
+  get props() {
+    return this.#props;
+  }
 
 
   #replaceWaypointToEdit() {
