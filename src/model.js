@@ -7,13 +7,15 @@ export default class PointsModel {
 
   get points() {
     const uniqueMap = {};
-    while (this.#points.length < NUMBER_OF_EVENTS) {
+
+    for (let i = 0; this.#points.length < NUMBER_OF_EVENTS; i++) {
       const randomEl = getRandomElement();
       if (!uniqueMap[randomEl.id]) {
         uniqueMap[randomEl.id] = randomEl;
         this.#points.push(randomEl);
       }
     }
+
     return this.#points;
   }
 }

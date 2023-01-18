@@ -58,6 +58,7 @@ export default class SortsView extends AbstractView {
 
   #sortTypeChangeHandler = (evt) => {
     const target = evt.target.closest('.trip-sort__input');
+
     if (!target) {
       return;
     }
