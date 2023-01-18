@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
 
 function createOfferListTemplate(offers, waypoint) {
@@ -31,12 +31,27 @@ function createCityListTemplate(availableCities) {
   )).join('');
 }
 
+function createDestinationTemplate(waypoint) {
+  return `<section class="event__section  event__section--destination">
+            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+            <p class="event__destination-description">${waypoint.destination.description}</p>
+
+            <div class="event__photos-container">
+              <div class="event__photos-tape">
+                ${waypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+              </div>
+            </div>
+          </section>`;
+}
+
 function createEditFormsTemplate(waypoint, types, availableCities, offers) {
   const typeList = createTypeListTemplate(types, waypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, waypoint);
   const dateFrom = humanizePointDateAndTime(waypoint.date_from);
   const dateTo = humanizePointDateAndTime(waypoint.date_to);
+  const descriptionDest = createDestinationTemplate(waypoint);
+  // const destinationName = document.querySelector('.event__input--destination');
 
   return (
     `<form class="event event--edit" action="#" method="post">
@@ -94,22 +109,13 @@ function createEditFormsTemplate(waypoint, types, availableCities, offers) {
           </div>
         </section>
 
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${waypoint.destination.description}</p>
-
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-              ${waypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
-            </div>
-          </div>
-        </section>
+        ${waypoint.destination.name ? descriptionDest : ''}
       </section>
     </form>`
   );
 }
 
-export default class EditFormView extends AbstractView {
+export default class EditFormView extends AbstractStatefulView {
   #waypoint = null;
   #types = null;
   #availableCities = null;
@@ -126,9 +132,29 @@ export default class EditFormView extends AbstractView {
     this.#handleEditSubmit = onEditSubmit;
     this.#handleEditReset = onEditReset;
 
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers() {
     this.element.addEventListener('submit', this.#editSubmitHandler);
     this.element.addEventListener('reset', this.#editResetHandler);
+
+    this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
   }
+
+  #typeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement(
+      this.#waypoint.type = evt.target.textContent,
+      this.#waypoint.offers = []
+    );
+  };
+
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement();
+  };
 
   get template() {
     return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers);
@@ -143,4 +169,5 @@ export default class EditFormView extends AbstractView {
     evt.preventDefault();
     this.#handleEditReset();
   };
+
 }
