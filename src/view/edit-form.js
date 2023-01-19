@@ -33,16 +33,20 @@ function createCityListTemplate(availableCities) {
 
 function createDestinationTemplate(waypoint, destinations) {
   const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
-  return `<section class="event__section  event__section--destination">
-            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${pointDestination.description}</p>
+  if (pointDestination.description && pointDestination.pictures) {
+    return `<section class="event__section  event__section--destination">
+              <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+              <p class="event__destination-description">${pointDestination.description}</p>
 
-            <div class="event__photos-container">
-              <div class="event__photos-tape">
-                ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+              <div class="event__photos-container">
+                <div class="event__photos-tape">
+                  ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+                </div>
               </div>
-            </div>
-          </section>`;
+            </section>`;
+  } else {
+    return '';
+  }
 }
 
 function createEditFormsTemplate(waypoint, types, availableCities, offers, destinations) {
@@ -156,22 +160,19 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    console.log(evt.target.value);
     let cityId = 0;
+
     for (let i = 0; i < this.#destinations.length; i++) {
       if (this.#destinations[i].name === evt.target.value) {
         cityId = this.#destinations[i].id;
-        console.log(`this.#destinations[i].id: ${this.#destinations[i].id}`);
-        console.log(`cityId: ${cityId}`);
         this.updateElement(
           this.#waypoint.destination = cityId
         );
       } else {
         cityId = 0;
       }
-      console.log(`cityId из цикла: ${cityId}`);
     }
-    console.log(cityId);
+
     this.updateElement(
       this.#waypoint.destination = cityId
     );

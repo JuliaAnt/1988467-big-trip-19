@@ -1,12 +1,12 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
-import { pointTypes, cities, destinations, offersByType } from '../mock/mock-data.js';
+import { pointTypes, cities, offersByType, destinations } from '../mock/mock-data.js';
 
 const BLANK_POINT = {
   'base_price': '',
   'date_from': '2023-01-01T00:00:00.000Z',
   'date_to': '2023-01-01T00:00:00.000Z',
-  'destination': destinations[0],
+  'destination': 0,
   'id': '1',
   'is_favorite': false,
   'offers': [],
@@ -43,12 +43,32 @@ function createCityListTemplate(availableCities) {
   )).join('');
 }
 
-function createNewPointTemplate(newWaypoint, types, availableCities, offers) {
+function createDestinationTemplate(newWaypoint, newDestinations) {
+  const pointDestination = newDestinations.find((destinationToFind) => newWaypoint.destination === destinationToFind.id);
+  if (pointDestination.description && pointDestination.pictures) {
+    return `<section class="event__section  event__section--destination">
+              <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+              <p class="event__destination-description">${pointDestination.description}</p>
+
+              <div class="event__photos-container">
+                <div class="event__photos-tape">
+                  ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+                </div>
+              </div>
+            </section>`;
+  } else {
+    return '';
+  }
+}
+
+function createNewPointTemplate(newWaypoint, types, availableCities, offers, newDestinations) {
   const typeList = createTypeListTemplate(types, newWaypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, newWaypoint);
   const dateFrom = humanizePointDateAndTime(newWaypoint.date_from);
   const dateTo = humanizePointDateAndTime(newWaypoint.date_to);
+  const descriptionDest = createDestinationTemplate(newWaypoint, newDestinations);
+  const pointDestination = newDestinations.find((destinationToFind) => newWaypoint.destination === destinationToFind.id);
 
   return (
     `<form class="event event--edit" action="#" method="post">
@@ -72,7 +92,7 @@ function createNewPointTemplate(newWaypoint, types, availableCities, offers) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${newWaypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${newWaypoint.destination.name}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination.name}" list="destination-list-2">
           <datalist id="destination-list-2">
           ${cityList}
           </datalist>
@@ -106,16 +126,7 @@ function createNewPointTemplate(newWaypoint, types, availableCities, offers) {
           </div>
         </section>
 
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${newWaypoint.destination.description}</p>
-
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-              ${newWaypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
-            </div>
-          </div>
-        </section>
+        ${newWaypoint.destination ? descriptionDest : ''}
       </section>
     </form>`
   );
@@ -126,17 +137,54 @@ export default class NewPointView extends AbstractView {
   #types = null;
   #availableCities = null;
   #offers = null;
+  #newDestinations = null;
 
-  constructor({ newWaypoint = BLANK_POINT, types = pointTypes, availableCities = cities, offers = offersByType }) {
+  constructor({ newWaypoint = BLANK_POINT, types = pointTypes, availableCities = cities, offers = offersByType, newDestinations = destinations }) {
     super();
     this.#newWaypoint = newWaypoint;
     this.#types = types;
     this.#availableCities = availableCities;
     this.#offers = offers;
+    this.#newDestinations = newDestinations;
+
+    this._restoreHandlers();
   }
 
+  _restoreHandlers() {
+    this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
+  }
+
+  #typeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement(
+      this.#newWaypoint.type = evt.target.textContent,
+      this.#newWaypoint.offers = []
+    );
+  };
+
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+    let cityId = 0;
+
+    for (let i = 0; i < this.#newDestinations.length; i++) {
+      if (this.#newDestinations[i].name === evt.target.value) {
+        cityId = this.#newDestinations[i].id;
+        this.updateElement(
+          this.#newWaypoint.destination = cityId
+        );
+      } else {
+        cityId = 0;
+      }
+    }
+
+    this.updateElement(
+      this.#newWaypoint.destination = cityId
+    );
+  };
+
   get template() {
-    return createNewPointTemplate(this.#newWaypoint, this.#types, this.#availableCities, this.#offers);
+    return createNewPointTemplate(this.#newWaypoint, this.#types, this.#availableCities, this.#offers, this.#newDestinations);
   }
 }
 
