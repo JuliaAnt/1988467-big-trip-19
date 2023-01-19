@@ -31,27 +31,28 @@ function createCityListTemplate(availableCities) {
   )).join('');
 }
 
-function createDestinationTemplate(waypoint) {
+function createDestinationTemplate(waypoint, destinations) {
+  const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
   return `<section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${waypoint.destination.description}</p>
+            <p class="event__destination-description">${pointDestination.description}</p>
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${waypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+                ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
               </div>
             </div>
           </section>`;
 }
 
-function createEditFormsTemplate(waypoint, types, availableCities, offers) {
+function createEditFormsTemplate(waypoint, types, availableCities, offers, destinations) {
   const typeList = createTypeListTemplate(types, waypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, waypoint);
   const dateFrom = humanizePointDateAndTime(waypoint.date_from);
   const dateTo = humanizePointDateAndTime(waypoint.date_to);
-  const descriptionDest = createDestinationTemplate(waypoint);
-  // const destinationName = document.querySelector('.event__input--destination');
+  const descriptionDest = createDestinationTemplate(waypoint, destinations);
+  const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
 
   return (
     `<form class="event event--edit" action="#" method="post">
@@ -75,7 +76,7 @@ function createEditFormsTemplate(waypoint, types, availableCities, offers) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${waypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${waypoint.destination.name}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination.name}" list="destination-list-2">
           <datalist id="destination-list-2">
           ${cityList}
           </datalist>
@@ -109,7 +110,7 @@ function createEditFormsTemplate(waypoint, types, availableCities, offers) {
           </div>
         </section>
 
-        ${waypoint.destination.name ? descriptionDest : ''}
+        ${waypoint.destination ? descriptionDest : ''}
       </section>
     </form>`
   );
@@ -122,13 +123,15 @@ export default class EditFormView extends AbstractStatefulView {
   #offers = null;
   #handleEditSubmit = null;
   #handleEditReset = null;
+  #destinations = null;
 
-  constructor({ waypoint, types, availableCities, offers, onEditSubmit, onEditReset }) {
+  constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
     super();
     this.#waypoint = waypoint;
     this.#types = types;
     this.#availableCities = availableCities;
     this.#offers = offers;
+    this.#destinations = destinations;
     this.#handleEditSubmit = onEditSubmit;
     this.#handleEditReset = onEditReset;
 
@@ -140,7 +143,7 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.addEventListener('reset', this.#editResetHandler);
 
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
   }
 
   #typeChangeHandler = (evt) => {
@@ -153,11 +156,29 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement();
+    console.log(evt.target.value);
+    let cityId = 0;
+    for (let i = 0; i < this.#destinations.length; i++) {
+      if (this.#destinations[i].name === evt.target.value) {
+        cityId = this.#destinations[i].id;
+        console.log(`this.#destinations[i].id: ${this.#destinations[i].id}`);
+        console.log(`cityId: ${cityId}`);
+        this.updateElement(
+          this.#waypoint.destination = cityId
+        );
+      } else {
+        cityId = 0;
+      }
+      console.log(`cityId из цикла: ${cityId}`);
+    }
+    console.log(cityId);
+    this.updateElement(
+      this.#waypoint.destination = cityId
+    );
   };
 
   get template() {
-    return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers);
+    return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers, this.#destinations);
   }
 
   #editSubmitHandler = (evt) => {

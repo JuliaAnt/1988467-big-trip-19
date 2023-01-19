@@ -14,13 +14,16 @@ function createWaypointOffersTemplate(offers, waypoint) {
     ) : '')).join('');
 }
 
-function createWaypointTemplate(offers, waypoint) {
+function createWaypointTemplate(offers, waypoint, destinations) {
   const dateFrom = humanizePointDueDate(waypoint.date_from);
   const timeTo = humanizePointTime(waypoint.date_to);
   const timeFrom = humanizePointTime(waypoint.date_from);
   const duration = calculateDuration(waypoint.date_from, waypoint.date_to);
   const favoriteClassName = waypoint.is_favorite ? 'event__favorite-btn--active' : '';
   const offersTemplate = createWaypointOffersTemplate(offers, waypoint);
+
+  const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
+
 
   return (
     `<li class="trip-events__item">
@@ -29,7 +32,7 @@ function createWaypointTemplate(offers, waypoint) {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${waypoint.type}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${waypoint.type} ${waypoint.destination.name}</h3>
+        <h3 class="event__title">${waypoint.type} ${pointDestination.name}</h3>
         <div class="event__schedule">
           <p class="event__time">
             <time class="event__start-time" datetime="2019-03-18T10:30">${timeFrom}</time>
@@ -64,11 +67,13 @@ export default class WaypointView extends AbstractView {
   #waypoint = null;
   #handleClick = null;
   #handleFavoriteClick = null;
+  #destinations = null;
 
-  constructor({ offers, waypoint, onClick, onFavoriteClick }) {
+  constructor({ offers, waypoint, destinations, onClick, onFavoriteClick }) {
     super();
     this.#offers = offers;
     this.#waypoint = waypoint;
+    this.#destinations = destinations;
     this.#handleClick = onClick;
     this.#handleFavoriteClick = onFavoriteClick;
 
@@ -77,7 +82,7 @@ export default class WaypointView extends AbstractView {
   }
 
   get template() {
-    return createWaypointTemplate(this.#offers, this.#waypoint);
+    return createWaypointTemplate(this.#offers, this.#waypoint, this.#destinations);
   }
 
   #favoriteClickHandler = (evt) => {

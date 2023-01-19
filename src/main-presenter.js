@@ -5,7 +5,7 @@ import EventView from './view/event.js';
 import { remove, render, RenderPosition } from './framework/render.js';
 import PointsModel from './model.js';
 import EmptyEventsView from './view/empty-events.js';
-import { offersByType, pointTypes, cities } from './mock/mock-data.js';
+import { offersByType, pointTypes, cities, destinations } from './mock/mock-data.js';
 import PointPresenter from './point-presenter.js';
 import { updateItem, sortDayDesc, sortTimeDesc, sortPriceDesc } from './utils.js';
 import { SortType } from './view/sorts.js';
@@ -86,7 +86,7 @@ class TripPresenter {
     this.#soursedWaypoints = updateItem(this.#soursedWaypoints, updatedPoint);
     const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
     const { types, availableCities, offers } = pointPresenter.props;
-    pointPresenter.init({ types, availableCities, offers, waypoint: updatedPoint });
+    pointPresenter.init({ types, availableCities, offers, destinations, waypoint: updatedPoint });
   };
 
   #renderEmptyEvents() {
@@ -110,6 +110,7 @@ class TripPresenter {
         types: pointTypes,
         availableCities: cities,
         offers: offersByType,
+        destinations: destinations,
       };
       this.#renderPoint(props);
     });
