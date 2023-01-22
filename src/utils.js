@@ -46,4 +46,20 @@ function updateItem(items, update) {
   return items.splice(items.findIndex((item) => item.id === update.id), 1, update);
 }
 
-export { getRandomArrayElement, updateItem, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime };
+function sortDayDesc(waypointA, waypointB) {
+  const dateA = new Date(waypointA.date_from);
+  const dateB = new Date(waypointB.date_from);
+  return dateA - dateB;
+}
+
+function sortTimeDesc(waypointA, waypointB) {
+  const durationA = new Date(waypointA.date_to) - new Date(waypointA.date_from);
+  const durationB = new Date(waypointB.date_to) - new Date(waypointB.date_from);
+  return durationB - durationA;
+}
+
+function sortPriceDesc(waypointA, waypointB) {
+  return waypointB.base_price - waypointA.base_price;
+}
+
+export { getRandomArrayElement, updateItem, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime, sortDayDesc, sortTimeDesc, sortPriceDesc };
