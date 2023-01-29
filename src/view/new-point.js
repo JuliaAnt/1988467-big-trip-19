@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
 import { pointTypes, cities, offersByType, destinations } from '../mock/mock-data.js';
 
@@ -132,7 +132,7 @@ function createNewPointTemplate(newWaypoint, types, availableCities, offers, new
   );
 }
 
-export default class NewPointView extends AbstractView {
+export default class NewPointView extends AbstractStatefulView {
   #newDestinations = null;
 
   constructor({ newWaypoint = BLANK_POINT, types = pointTypes, availableCities = cities, offers = offersByType, newDestinations = destinations }) {
