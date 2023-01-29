@@ -49,7 +49,8 @@ function createDestinationTemplate(waypoint, destinations) {
   }
 }
 
-function createEditFormsTemplate(waypoint, types, availableCities, offers, destinations) {
+function createEditFormsTemplate(data) {
+  const { waypoint, types, availableCities, offers, destinations } = data;
   const typeList = createTypeListTemplate(types, waypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, waypoint);
@@ -131,11 +132,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
     super();
-    this.#waypoint = waypoint;
-    this.#types = types;
-    this.#availableCities = availableCities;
-    this.#offers = offers;
-    this.#destinations = destinations;
+    this._setState(EditFormView.parsePointToState({ waypoint, types, availableCities, offers, destinations }));
     this.#handleEditSubmit = onEditSubmit;
     this.#handleEditReset = onEditReset;
 
@@ -153,43 +150,53 @@ export default class EditFormView extends AbstractStatefulView {
   #typeChangeHandler = (evt) => {
     evt.preventDefault();
     this.updateElement(
-      this.#waypoint.type = evt.target.textContent,
-      this.#waypoint.offers = []
+      this._state.waypoint.type = evt.target.textContent,
+      this._state.waypoint.offers = []
     );
   };
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    let cityId = 0;
+    let cityId = '';
 
-    for (let i = 0; i < this.#destinations.length; i++) {
-      if (this.#destinations[i].name === evt.target.value) {
-        cityId = this.#destinations[i].id;
+    for (let i = 0; i < this._state.destinations.length; i++) {
+      if (this._state.destinations[i].name === evt.target.value) {
+        cityId = this._state.destinations[i].id;
         this.updateElement(
-          this.#waypoint.destination = cityId
+          this._state.waypoint.destination = cityId
         );
       } else {
-        cityId = 0;
+        cityId = '';
       }
     }
-
-    this.updateElement(
-      this.#waypoint.destination = cityId
-    );
   };
 
   get template() {
-    return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers, this.#destinations);
+    return createEditFormsTemplate(this._state);
+  }
+
+  reset(waypoint) {
+    this.updateElement(
+      EditFormView.parsePointToState(waypoint)
+    );
   }
 
   #editSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditSubmit(this.#waypoint);
+    this.#handleEditSubmit(EditFormView.parseStateToPoint(this._state));
   };
 
   #editResetHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditReset();
+    this.#handleEditReset(EditFormView.parseStateToPoint(this._state));
   };
+
+  static parsePointToState(waypoint) {
+    return { ...waypoint };
+  }
+
+  static parseStateToPoint(state) {
+    return { ...state };
+  }
 
 }
