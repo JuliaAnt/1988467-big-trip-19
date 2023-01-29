@@ -133,19 +133,11 @@ function createNewPointTemplate(newWaypoint, types, availableCities, offers, new
 }
 
 export default class NewPointView extends AbstractView {
-  #newWaypoint = null;
-  #types = null;
-  #availableCities = null;
-  #offers = null;
   #newDestinations = null;
 
   constructor({ newWaypoint = BLANK_POINT, types = pointTypes, availableCities = cities, offers = offersByType, newDestinations = destinations }) {
     super();
-    this.#newWaypoint = newWaypoint;
-    this.#types = types;
-    this.#availableCities = availableCities;
-    this.#offers = offers;
-    this.#newDestinations = newDestinations;
+    this._setState(NewPointView.parsePointToState({ newWaypoint, types, availableCities, offers, newDestinations }));
 
     this._restoreHandlers();
   }
@@ -158,33 +150,29 @@ export default class NewPointView extends AbstractView {
   #typeChangeHandler = (evt) => {
     evt.preventDefault();
     this.updateElement(
-      this.#newWaypoint.type = evt.target.textContent,
-      this.#newWaypoint.offers = []
+      this._state.newWaypoint.type = evt.target.textContent,
+      this._state.newWaypoint.offers = []
     );
   };
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    let cityId = 0;
+    let cityId = '';
 
     for (let i = 0; i < this.#newDestinations.length; i++) {
-      if (this.#newDestinations[i].name === evt.target.value) {
-        cityId = this.#newDestinations[i].id;
+      if (this._state.newDestinations[i].name === evt.target.value) {
+        cityId = this._state.newDestinations[i].id;
         this.updateElement(
-          this.#newWaypoint.destination = cityId
+          this._state.newWaypoint.destination = cityId
         );
       } else {
-        cityId = 0;
+        cityId = '';
       }
     }
-
-    this.updateElement(
-      this.#newWaypoint.destination = cityId
-    );
   };
 
   get template() {
-    return createNewPointTemplate(this.#newWaypoint, this.#types, this.#availableCities, this.#offers, this.#newDestinations);
+    return createNewPointTemplate(this._state);
   }
 }
 

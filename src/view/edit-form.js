@@ -122,13 +122,8 @@ function createEditFormsTemplate(data) {
 }
 
 export default class EditFormView extends AbstractStatefulView {
-  #waypoint = null;
-  #types = null;
-  #availableCities = null;
-  #offers = null;
   #handleEditSubmit = null;
   #handleEditReset = null;
-  #destinations = null;
 
   constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
     super();
