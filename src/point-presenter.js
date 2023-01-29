@@ -81,18 +81,18 @@ export default class PointPresenter {
   }
 
 
-  #replaceWaypointToEdit() {
+  #replaceWaypointToEdit = () => {
     replace(this.#pointEditItem, this.#pointListItem);
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
-  }
+  };
 
-  #replaceEditToWaypoint() {
+  #replaceEditToWaypoint = () => {
     replace(this.#pointListItem, this.#pointEditItem);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
-  }
+  };
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {

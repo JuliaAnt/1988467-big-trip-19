@@ -6,36 +6,35 @@ const SortType = {
   TIME_DESC: 'time-desc',
 };
 
+const SortNames = ['day', 'event', 'time', 'price', 'offer'];
+
+const TYPE_SORT_MAP = {
+  day: SortType.DEFAULT,
+  time: SortType.TIME_DESC,
+  price: SortType.PRICE_DESC
+};
+
+function createSortListTemplate(currentSortType) {
+  return SortNames.map((sortName) => {
+    const typeSorts = TYPE_SORT_MAP[sortName] || '';
+    return (
+      `<div class="trip-sort__item  trip-sort__item--${sortName}">
+        <input id="sort-${sortName}" class="trip-sort__input  visually-hidden" data-sort-type="${typeSorts}"
+          type="radio" name="trip-sort" value="sort-${sortName}"
+          ${typeSorts === currentSortType ? 'checked' : ''}
+          ${sortName === 'event' || sortName === 'offer' ? 'disabled' : ''}
+        >
+        <label class="trip-sort__btn" for="sort-${sortName}">${sortName}</label>
+      </div>`
+    );
+  }).join('');
+}
+
 function createSortsTemplate(currentSortType) {
+  const sortList = createSortListTemplate(currentSortType);
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-      <div class="trip-sort__item  trip-sort__item--day">
-        <input id="sort-day" class="trip-sort__input  visually-hidden" data-sort-type="${SortType.DEFAULT}"
-         type="radio" name="trip-sort" value="sort-day" ${currentSortType === SortType.DEFAULT ? 'checked' : ''}>
-        <label class="trip-sort__btn" for="sort-day">Day</label>
-      </div>
-
-      <div class="trip-sort__item  trip-sort__item--event">
-        <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" disabled>
-        <label class="trip-sort__btn" for="sort-event">Event</label>
-      </div>
-
-      <div class="trip-sort__item  trip-sort__item--time">
-        <input id="sort-time" class="trip-sort__input  visually-hidden" data-sort-type="${SortType.TIME_DESC}"
-        type="radio" name="trip-sort" value="sort-time" ${currentSortType === SortType.TIME_DESC ? 'checked' : ''}>
-        <label class="trip-sort__btn" for="sort-time">Time</label>
-      </div>
-
-      <div class="trip-sort__item  trip-sort__item--price">
-        <input id="sort-price" class="trip-sort__input  visually-hidden" data-sort-type="${SortType.PRICE_DESC}"
-         type="radio" name="trip-sort" value="sort-price" ${currentSortType === SortType.PRICE_DESC ? 'checked' : ''}>
-        <label class="trip-sort__btn" for="sort-price">Price</label>
-      </div>
-
-      <div class="trip-sort__item  trip-sort__item--offer">
-        <input id="sort-offer" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-offer" disabled>
-        <label class="trip-sort__btn" for="sort-offer">Offers</label>
-      </div>
+      ${sortList}
     </form>`
   );
 }
@@ -53,17 +52,21 @@ export default class SortsView extends AbstractView {
   }
 
   get template() {
+
     return createSortsTemplate(this.#currentSortType);
   }
 
   #sortTypeChangeHandler = (evt) => {
     const target = evt.target.closest('.trip-sort__input');
+
     if (!target) {
       return;
     }
 
     evt.preventDefault();
     this.#currentSortType = evt.target.dataset.sortType;
+
+
     this.#handlerSortTypeChange(this.#currentSortType);
   };
 

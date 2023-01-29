@@ -46,31 +46,15 @@ function updateItem(items, update) {
   return items.splice(items.findIndex((item) => item.id === update.id), 1, update);
 }
 
-function getWeightForNullDate(dateA, dateB) {
-  if (dateA === null && dateB === null) {
-    return 0;
-  }
-
-  if (dateA === null) {
-    return 1;
-  }
-
-  if (dateB === null) {
-    return -1;
-  }
-
-  return null;
-}
-
 function sortDayDesc(waypointA, waypointB) {
-  const weight = getWeightForNullDate(waypointA.date_from, waypointB.date_from);
-
-  return weight ?? dayjs(waypointA.date_from).diff(dayjs(waypointB.date_from));
+  const dateA = new Date(waypointA.date_from);
+  const dateB = new Date(waypointB.date_from);
+  return dateA - dateB;
 }
 
 function sortTimeDesc(waypointA, waypointB) {
-  const durationA = dayjs(waypointA.date_to).diff(waypointA.date_from);
-  const durationB = dayjs(waypointB.date_to).diff(waypointB.date_from);
+  const durationA = new Date(waypointA.date_to) - new Date(waypointA.date_from);
+  const durationB = new Date(waypointB.date_to) - new Date(waypointB.date_from);
   return durationB - durationA;
 }
 
