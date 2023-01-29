@@ -1,5 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createOfferListTemplate(offers, waypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === waypoint.type);
@@ -124,6 +127,8 @@ function createEditFormsTemplate(data) {
 export default class EditFormView extends AbstractStatefulView {
   #handleEditSubmit = null;
   #handleEditReset = null;
+  #datepickerFrom = null;
+  #datepickerTo = null;
 
   constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
     super();
@@ -140,6 +145,8 @@ export default class EditFormView extends AbstractStatefulView {
 
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
+
+    this.#setDatepicker();
   }
 
   #typeChangeHandler = (evt) => {
@@ -194,4 +201,51 @@ export default class EditFormView extends AbstractStatefulView {
     return { ...state };
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
+  }
+
+  #dateFromChangeHandler = (dateFrom) => {
+    this.updateElement(
+      this._state.waypoint['date_from'] = dateFrom
+    );
+  };
+
+  #dateToChangeHandler = (dateTo) => {
+    this.updateElement(
+      this._state.waypoint['date_to'] = dateTo
+    );
+  };
+
+
+  #setDatepicker() {
+    this.#datepickerFrom = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.waypoint['date_from'],
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+
+
+    this.#datepickerTo = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.waypoint['date_to'],
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  }
 }
