@@ -71,6 +71,7 @@ export default class PointPresenter {
 
   setDefaultMode() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#pointEditItem.reset(this.#props);
       this.#replaceEditToWaypoint();
     }
   }
@@ -96,6 +97,7 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#pointEditItem.reset(this.#props);
       this.#replaceEditToWaypoint();
     }
   };
@@ -115,6 +117,7 @@ export default class PointPresenter {
   };
 
   #handleEditReset = () => {
+    this.#pointEditItem.reset(this.#props);
     this.#replaceEditToWaypoint();
   };
 }

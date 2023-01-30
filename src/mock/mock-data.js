@@ -208,7 +208,7 @@ const destinations = [
   {
     'id': 1,
     'description': getRandomArrayElement(descriptions),
-    'name': getRandomArrayElement(cities),
+    'name': 'Amsterdam',
     'pictures': [
       {
         'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
@@ -235,7 +235,7 @@ const destinations = [
   {
     'id': 2,
     'description': getRandomArrayElement(descriptions),
-    'name': getRandomArrayElement(cities),
+    'name': 'Milan',
     'pictures': [
       {
         'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
@@ -262,7 +262,7 @@ const destinations = [
   {
     'id': 3,
     'description': getRandomArrayElement(descriptions),
-    'name': getRandomArrayElement(cities),
+    'name': 'Seville',
     'pictures': [
       {
         'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
@@ -289,7 +289,7 @@ const destinations = [
   {
     'id': 4,
     'description': getRandomArrayElement(descriptions),
-    'name': getRandomArrayElement(cities),
+    'name': 'Budapest',
     'pictures': [
       {
         'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
@@ -316,7 +316,34 @@ const destinations = [
   {
     'id': 5,
     'description': getRandomArrayElement(descriptions),
-    'name': getRandomArrayElement(cities),
+    'name': 'Edinburgh',
+    'pictures': [
+      {
+        'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
+        'description': getRandomArrayElement(cities),
+      },
+      {
+        'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
+        'description': getRandomArrayElement(cities),
+      },
+      {
+        'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
+        'description': getRandomArrayElement(cities),
+      },
+      {
+        'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
+        'description': getRandomArrayElement(cities),
+      },
+      {
+        'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
+        'description': getRandomArrayElement(cities),
+      },
+    ]
+  },
+  {
+    'id': 6,
+    'description': getRandomArrayElement(descriptions),
+    'name': 'Vienna',
     'pictures': [
       {
         'src': `https://loremflickr.com/248/152?random=${getRandomPositiveInteger(0, COUNT_OF_PHOTO)}`,
@@ -347,9 +374,7 @@ const mockPoints = [
     'base_price': getRandomPositiveInteger(10, 1500),
     'date_from': '2019-07-10T22:55:56.845Z',
     'date_to': '2019-07-11T11:22:13.375Z',
-    get destination() {
-      return destinations[this.id - 1];
-    },
+    'destination': getRandomPositiveInteger(1, 6),
     'id': '1',
     'is_favorite': true,
     'offers': [3],
@@ -359,9 +384,7 @@ const mockPoints = [
     'base_price': getRandomPositiveInteger(10, 1500),
     'date_from': '2019-08-10T22:55:56.845Z',
     'date_to': '2019-08-12T11:22:13.375Z',
-    get destination() {
-      return destinations[this.id - 1];
-    },
+    'destination': getRandomPositiveInteger(1, 6),
     'id': '2',
     'is_favorite': false,
     'offers': [1],
@@ -371,9 +394,7 @@ const mockPoints = [
     'base_price': getRandomPositiveInteger(10, 1500),
     'date_from': '2019-07-10T09:15:56.845Z',
     'date_to': '2019-07-10T12:22:13.375Z',
-    get destination() {
-      return destinations[this.id - 1];
-    },
+    'destination': getRandomPositiveInteger(1, 6),
     'id': '3',
     'is_favorite': false,
     'offers': [2],
@@ -383,9 +404,7 @@ const mockPoints = [
     'base_price': getRandomPositiveInteger(10, 1500),
     'date_from': '2023-01-05T06:40:56.845Z',
     'date_to': '2023-01-05T09:45:13.375Z',
-    get destination() {
-      return destinations[this.id - 1];
-    },
+    'destination': getRandomPositiveInteger(1, 6),
     'id': '4',
     'is_favorite': false,
     'offers': [1],
@@ -395,9 +414,7 @@ const mockPoints = [
     'base_price': getRandomPositiveInteger(10, 1500),
     'date_from': '2023-01-26T13:20:15.845Z',
     'date_to': '2023-01-26T17:25:13.375Z',
-    get destination() {
-      return destinations[this.id - 1];
-    },
+    'destination': getRandomPositiveInteger(1, 6),
     'id': '5',
     'is_favorite': false,
     'offers': [2],

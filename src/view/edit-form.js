@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
 
 function createOfferListTemplate(offers, waypoint) {
@@ -31,12 +31,30 @@ function createCityListTemplate(availableCities) {
   )).join('');
 }
 
-function createEditFormsTemplate(waypoint, types, availableCities, offers) {
+function createDestinationTemplate(waypoint, destinations) {
+  const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
+  return pointDestination.description && pointDestination.pictures ?
+    `<section class="event__section  event__section--destination">
+      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+      <p class="event__destination-description">${pointDestination.description}</p>
+
+      <div class="event__photos-container">
+        <div class="event__photos-tape">
+          ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+        </div>
+      </div>
+    </section>` : '';
+}
+
+function createEditFormsTemplate(data) {
+  const { waypoint, types, availableCities, offers, destinations } = data;
   const typeList = createTypeListTemplate(types, waypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, waypoint);
   const dateFrom = humanizePointDateAndTime(waypoint.date_from);
   const dateTo = humanizePointDateAndTime(waypoint.date_to);
+  const descriptionDest = createDestinationTemplate(waypoint, destinations);
+  const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
 
   return (
     `<form class="event event--edit" action="#" method="post">
@@ -60,7 +78,7 @@ function createEditFormsTemplate(waypoint, types, availableCities, offers) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${waypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${waypoint.destination.name}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination.name}" list="destination-list-2">
           <datalist id="destination-list-2">
           ${cityList}
           </datalist>
@@ -94,53 +112,76 @@ function createEditFormsTemplate(waypoint, types, availableCities, offers) {
           </div>
         </section>
 
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${waypoint.destination.description}</p>
-
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-              ${waypoint.destination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
-            </div>
-          </div>
-        </section>
+        ${waypoint.destination ? descriptionDest : ''}
       </section>
     </form>`
   );
 }
 
-export default class EditFormView extends AbstractView {
-  #waypoint = null;
-  #types = null;
-  #availableCities = null;
-  #offers = null;
+export default class EditFormView extends AbstractStatefulView {
   #handleEditSubmit = null;
   #handleEditReset = null;
 
-  constructor({ waypoint, types, availableCities, offers, onEditSubmit, onEditReset }) {
+  constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
     super();
-    this.#waypoint = waypoint;
-    this.#types = types;
-    this.#availableCities = availableCities;
-    this.#offers = offers;
+    this._setState(EditFormView.parsePointToState({ waypoint, types, availableCities, offers, destinations }));
     this.#handleEditSubmit = onEditSubmit;
     this.#handleEditReset = onEditReset;
 
-    this.element.addEventListener('submit', this.#editSubmitHandler);
-    this.element.addEventListener('reset', this.#editResetHandler);
+    this._restoreHandlers();
   }
 
+  _restoreHandlers() {
+    this.element.addEventListener('submit', this.#editSubmitHandler);
+    this.element.addEventListener('reset', this.#editResetHandler);
+
+    this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
+  }
+
+  #typeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement(
+      this._state.waypoint.type = evt.target.textContent,
+      this._state.waypoint.offers = []
+    );
+  };
+
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    this._state.destinations.find((destinationItem) => destinationItem.name === evt.target.value ?
+      this.updateElement(
+        this._state.waypoint.destination = destinationItem.id
+      ) : '');
+  };
+
   get template() {
-    return createEditFormsTemplate(this.#waypoint, this.#types, this.#availableCities, this.#offers);
+    return createEditFormsTemplate(this._state);
+  }
+
+  reset(waypoint) {
+    this.updateElement(
+      EditFormView.parsePointToState(waypoint)
+    );
   }
 
   #editSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditSubmit(this.#waypoint);
+    this.#handleEditSubmit(EditFormView.parseStateToPoint(this._state));
   };
 
   #editResetHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditReset();
+    this.#handleEditReset(EditFormView.parseStateToPoint(this._state));
   };
+
+  static parsePointToState(waypoint) {
+    return { ...waypoint };
+  }
+
+  static parseStateToPoint(state) {
+    return { ...state };
+  }
+
 }
