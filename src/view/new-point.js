@@ -45,20 +45,17 @@ function createCityListTemplate(availableCities) {
 
 function createDestinationTemplate(newWaypoint, newDestinations) {
   const pointDestination = newDestinations.find((destinationToFind) => newWaypoint.destination === destinationToFind.id);
-  if (pointDestination.description && pointDestination.pictures) {
-    return `<section class="event__section  event__section--destination">
-              <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-              <p class="event__destination-description">${pointDestination.description}</p>
+  return pointDestination.description && pointDestination.pictures ?
+    `<section class="event__section  event__section--destination">
+      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+      <p class="event__destination-description">${pointDestination.description}</p>
 
-              <div class="event__photos-container">
-                <div class="event__photos-tape">
-                  ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
-                </div>
-              </div>
-            </section>`;
-  } else {
-    return '';
-  }
+      <div class="event__photos-container">
+        <div class="event__photos-tape">
+          ${pointDestination.pictures.map((i) => (`<img class="event__photo" src="${i.src}" alt="${i.description}">`))}
+        </div>
+      </div>
+    </section>` : '';
 }
 
 function createNewPointTemplate(newWaypoint, types, availableCities, offers, newDestinations) {
@@ -133,7 +130,6 @@ function createNewPointTemplate(newWaypoint, types, availableCities, offers, new
 }
 
 export default class NewPointView extends AbstractStatefulView {
-  #newDestinations = null;
 
   constructor({ newWaypoint = BLANK_POINT, types = pointTypes, availableCities = cities, offers = offersByType, newDestinations = destinations }) {
     super();
@@ -157,18 +153,11 @@ export default class NewPointView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    let cityId = '';
 
-    for (let i = 0; i < this.#newDestinations.length; i++) {
-      if (this._state.newDestinations[i].name === evt.target.value) {
-        cityId = this._state.newDestinations[i].id;
-        this.updateElement(
-          this._state.newWaypoint.destination = cityId
-        );
-      } else {
-        cityId = '';
-      }
-    }
+    this._state.newDestinations.find((destinationItem) => destinationItem.name === evt.target.value ?
+      this.updateElement(
+        this._state.newWaypoint.destination = destinationItem.id
+      ) : '');
   };
 
   get template() {
