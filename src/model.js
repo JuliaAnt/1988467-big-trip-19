@@ -1,8 +1,10 @@
 import { getRandomElement } from './mock/mock-data.js';
+import Observable from './framework/observable.js';
+
 
 const NUMBER_OF_EVENTS = 3;
 
-export default class PointsModel {
+export default class PointsModel extends Observable {
   #points = [];
 
   get points() {
