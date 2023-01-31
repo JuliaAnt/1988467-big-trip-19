@@ -1,5 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import rangePlugin from 'flatpickr/dist/plugins/rangePlugin.js';
 
 function createOfferListTemplate(offers, waypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === waypoint.type);
@@ -121,6 +124,7 @@ function createEditFormsTemplate(data) {
 export default class EditFormView extends AbstractStatefulView {
   #handleEditSubmit = null;
   #handleEditReset = null;
+  #datepicker = null;
 
   constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
     super();
@@ -137,6 +141,8 @@ export default class EditFormView extends AbstractStatefulView {
 
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
+
+    this.#setDatepicker();
   }
 
   #typeChangeHandler = (evt) => {
@@ -184,4 +190,34 @@ export default class EditFormView extends AbstractStatefulView {
     return { ...state };
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepicker) {
+      this.#datepicker.destroy();
+      this.#datepicker = null;
+    }
+  }
+
+  #dateChangeHandler = ([dateFrom, dateTo]) => {
+    this.updateElement(
+      this._state.waypoint['date_from'] = dateFrom,
+      this._state.waypoint['date_to'] = dateTo
+    );
+  };
+
+  #setDatepicker() {
+    const dateFrom = this.element.querySelector('#event-start-time-1');
+    const dateTo = this.element.querySelector('#event-end-time-1');
+
+    this.#datepicker = flatpickr(
+      dateFrom,
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        plugins: [new rangePlugin({ input: dateTo })],
+        onChange: this.#dateChangeHandler,
+      }
+    );
+  }
 }
