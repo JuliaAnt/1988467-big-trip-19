@@ -24,6 +24,13 @@ const TYPE_SORT_MAP = {
   price: SortType.PRICE_DESC
 };
 
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};
 
-export {SortType, SortNames, TYPE_SORT_MAP, UserAction, UpdateType};
+
+export { SortType, SortNames, TYPE_SORT_MAP, UserAction, UpdateType, FilterType };
 

@@ -1,62 +1,77 @@
-import FiltersView from './view/filters.js';
-import SortsView from './view/sorts.js';
-import EventsView from './view/event-list.js';
-import EventView from './view/event.js';
-import { remove, render, RenderPosition } from './framework/render.js';
-import PointsModel from './model.js';
-import EmptyEventsView from './view/empty-events.js';
-import { offersByType, pointTypes, cities, destinations } from './mock/mock-data.js';
+import SortsView from '../view/sorts.js';
+import EventsView from '../view/event-list.js';
+import EventView from '../view/event.js';
+import { remove, render, RenderPosition } from '../framework/render.js';
+import PointsModel from '../models/model.js';
+import EmptyEventsView from '../view/empty-events.js';
+import { offersByType, pointTypes, cities, destinations } from '../mock/mock-data.js';
 import PointPresenter from './point-presenter.js';
-import { sortDayDesc, sortTimeDesc, sortPriceDesc } from './utils.js';
-import { SortType, UpdateType, UserAction } from './const.js';
+import { sortDayDesc, sortTimeDesc, sortPriceDesc, filter } from '../utils.js';
+import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
+import FilterModel from '../models/filter-model.js';
+import FilterPresenter from './filter-presenter.js';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
 const pointsModel = new PointsModel();
+const filtersModel = new FilterModel();
 
 class TripPresenter {
   #headerContainer = null;
   #mainContainer = null;
   #model = null;
+  #filterModel = null;
 
   #pointPresenters = new Map();
+  #filterPresenter = null;
   #currentSortType = SortType.DEFAULT;
+  #filterType = FilterType.EVERYTHING;
 
   #eventList = new EventsView();
   #eventItem = new EventView();
-  #filtersComponent = new FiltersView();
   #sortComponent = null;
-  #emptyEventsComponent = new EmptyEventsView();
+  #emptyEventsComponent = null;
 
-  constructor({ headerContainer, mainContainer, model }) {
+  constructor({ headerContainer, mainContainer, model, filterModel }) {
     this.#headerContainer = headerContainer;
     this.#mainContainer = mainContainer;
     this.#model = model;
+    this.#filterModel = filterModel;
 
     this.#model.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get points() {
+    this.#filterType = this.#filterModel.filter;
+    const points = this.#model.points;
+    const filteredPoints = filter[this.#filterType](points);
+
+
     switch (this.#currentSortType) {
       case SortType.TIME_DESC:
-        return [...this.#model.points].sort(sortTimeDesc);
+        return filteredPoints.sort(sortTimeDesc);
       case SortType.DEFAULT:
-        return [...this.#model.points].sort(sortDayDesc);
+        return filteredPoints.sort(sortDayDesc);
       case SortType.PRICE_DESC:
-        return [...this.#model.points].sort(sortPriceDesc);
+        return filteredPoints.sort(sortPriceDesc);
     }
 
-    return this.#model.points;
+    return filteredPoints;
   }
 
   init() {
-    // this.#waypoints = [...this.#model.points];
-    // this.#waypoints.sort(sortDayDesc);
     this.#renderEventList();
   }
 
   #renderFilters = () => {
-    render(this.#filtersComponent, this.#headerContainer, RenderPosition.AFTERBEGIN);
+    this.#filterPresenter = new FilterPresenter({
+      filterContainer: this.#headerContainer,
+      filterModel: this.#filterModel,
+      model: this.#model
+    });
+
+    this.#filterPresenter.init();
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -67,8 +82,6 @@ class TripPresenter {
     this.#currentSortType = sortType;
     this.#clearEventList();
     this.#renderEventList();
-    // this.#clearEventList();
-    // this.#renderPoints();
   };
 
   #renderSort = () => {
@@ -103,16 +116,13 @@ class TripPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
         this.#handlePointChange(data);
         break;
       case UpdateType.MINOR:
-        // - обновить список (например, когда задача ушла в архив)
         this.#clearEventList();
         this.#renderEventList();
         break;
       case UpdateType.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
         this.#clearEventList({ resetSortType: true });
         this.#renderEventList();
         break;
@@ -120,6 +130,7 @@ class TripPresenter {
   };
 
   #renderEmptyEvents = () => {
+    this.#emptyEventsComponent = new EmptyEventsView(this.#filterType);
     render(this.#emptyEventsComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
   };
 
@@ -148,19 +159,15 @@ class TripPresenter {
 
   #clearEventList = ({ resetSortType = false } = {}) => {
     remove(this.#sortComponent);
-    remove(this.#emptyEventsComponent);
+
+    if (this.#emptyEventsComponent) {
+      remove(this.#emptyEventsComponent);
+    }
+
+    this.#filterPresenter.destroy();
 
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
-
-    // if (resetRenderedTaskCount) {
-    //   this.#renderedTaskCount = TASK_COUNT_PER_STEP;
-    // } else {
-    //   // На случай, если перерисовка доски вызвана
-    //   // уменьшением количества задач (например, удаление или перенос в архив)
-    //   // нужно скорректировать число показанных задач
-    //   this.#renderedTaskCount = Math.min(taskCount, this.#renderedTaskCount);
-    // }
 
     if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
@@ -188,6 +195,7 @@ const tripPresenter = new TripPresenter({
   headerContainer: tripControlsFilters,
   mainContainer: tripEvents,
   model: pointsModel,
+  filterModel: filtersModel,
 });
 
 tripPresenter.init();

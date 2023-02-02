@@ -1,3 +1,3 @@
-import './main-presenter.js';
+import './presenters/main-presenter.js';
 
 
