@@ -30,12 +30,12 @@ const offersByType = [
       },
       {
         'id': 2,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 20,
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade2',
         'price': 30,
       }
     ]
@@ -70,12 +70,12 @@ const offersByType = [
       },
       {
         'id': 2,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 20,
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade2',
         'price': 30,
       },
     ]
@@ -90,12 +90,12 @@ const offersByType = [
       },
       {
         'id': 2,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 20,
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade2',
         'price': 40,
       },
     ]
@@ -115,7 +115,7 @@ const offersByType = [
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 40,
       },
     ]
@@ -135,7 +135,7 @@ const offersByType = [
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 30,
       },
     ]
@@ -155,7 +155,7 @@ const offersByType = [
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 30,
       },
     ]
@@ -175,7 +175,7 @@ const offersByType = [
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 100,
       },
     ]
@@ -190,12 +190,12 @@ const offersByType = [
       },
       {
         'id': 2,
-        'title': 'Upgrade',
+        'title': 'Upgrade1',
         'price': 20,
       },
       {
         'id': 3,
-        'title': 'Upgrade',
+        'title': 'Upgrade2',
         'price': 50,
       },
     ]

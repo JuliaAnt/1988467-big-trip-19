@@ -20,7 +20,7 @@ function createOfferListTemplate(offers, newWaypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === newWaypoint.type);
 
   return pointTypeOffer.offers.map((offer) => (
-    `<div class="event__offer-selector">
+    `<div class="event__offer-selector data-offer-id="${offer.id}">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${newWaypoint.offers.includes(offer.id) ? 'checked' : ''}>
         <label class="event__offer-label" for="event-offer-meal-1">
           <span class="event__offer-title">${offer.title}</span>
@@ -145,6 +145,8 @@ export default class NewPointView extends AbstractStatefulView {
   _restoreHandlers() {
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
+    this.element.querySelector('.event__available-offers').addEventListener('click', this.#offersChangeHnadler);
 
     this.#setDatepicker();
   }
@@ -164,6 +166,31 @@ export default class NewPointView extends AbstractStatefulView {
       this.updateElement(
         this._state.newWaypoint.destination = destinationItem.id
       ) : '');
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this._setState(this._state.newWaypoint['base_price'] = evt.target.value);
+  };
+
+  #offersChangeHnadler = (evt) => {
+    const target = evt.target.closest('.event__offer-selector');
+
+    if (!target) {
+      return;
+    }
+
+    evt.preventDefault();
+    const offerId = +target.dataset.offerId;
+    const index = this._state.newWaypoint.offers.findIndex((offer) => offer === offerId);
+
+    if (index === -1) {
+      this._state.newWaypoint.offers.push(offerId);
+    } else {
+      this._state.newWaypoint.offers.splice(index, 1);
+    }
+
+    this.updateElement(this._state.newWaypoint.offers);
   };
 
   get template() {

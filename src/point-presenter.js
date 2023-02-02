@@ -1,6 +1,8 @@
 import { render, replace, remove } from './framework/render.js';
 import EditFormView from './view/edit-form.js';
 import WaypointView from './view/waypoint.js';
+import { UserAction, UpdateType } from './const.js';
+import { isDatesEqual, isPriceEqual, isDurationEqual } from './utils.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -40,12 +42,9 @@ export default class PointPresenter {
 
     this.#pointEditItem = new EditFormView({
       ...this.#props,
-      onEditSubmit: () => {
-        this.#handleEditSubmit();
-      },
-      onEditReset: () => {
-        this.#handleEditReset();
-      }
+      onEditSubmit: this.#handleEditSubmit,
+      onEditReset: this.#handleEditReset,
+      onDeleteClick: this.#handleDeleteClick
     });
 
     if (prevPointListItem === null || prevPointEditItem === null) {
@@ -108,11 +107,25 @@ export default class PointPresenter {
 
   #handleFavoriteClick = (waypoint) => {
     const updatedPoint = { ...waypoint, ['is_favorite']: !waypoint.is_favorite };
-    this.#handleDataChange(updatedPoint);
+
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      updatedPoint
+    );
   };
 
-  #handleEditSubmit = (props) => {
-    this.#handleDataChange(props);
+  #handleEditSubmit = (update) => {
+    const isMinorUpdate = !isDatesEqual(this.#props.waypoint['date_from'], update['date_from']) ||
+      !isPriceEqual(this.#props.waypoint['base_price'], update['base_price']) ||
+      !isDurationEqual(this.#props.waypoint, update);
+
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update
+    );
+
     this.#replaceEditToWaypoint();
   };
 
@@ -120,4 +133,13 @@ export default class PointPresenter {
     this.#pointEditItem.reset(this.#props);
     this.#replaceEditToWaypoint();
   };
+
+  #handleDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
+  };
 }
+
