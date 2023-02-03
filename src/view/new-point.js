@@ -4,6 +4,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import rangePlugin from 'flatpickr/dist/plugins/rangePlugin.js';
 import { nanoid } from 'nanoid';
+import he from 'he';
 
 const BLANK_POINT = {
   'base_price': '',
@@ -102,9 +103,9 @@ function createNewPointTemplate(data) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${newWaypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination ? pointDestination.name : ''}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination ? pointDestination.name : '')}" list="destination-list-2">
           <datalist id="destination-list-2">
-          ${cityList}
+          ${(cityList)}
           </datalist>
         </div>
 
@@ -163,7 +164,7 @@ export default class NewPointView extends AbstractStatefulView {
 
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('keyup', this.#priceChangeHandler);
     this.element.querySelector('.event__available-offers').addEventListener('click', this.#offersChangeHandler);
 
     this.#setDatepicker();
@@ -188,6 +189,7 @@ export default class NewPointView extends AbstractStatefulView {
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
+    evt.target.value = evt.target.value.replace(/[^\d]/g, '');
     this._setState(this._state.newWaypoint['base_price'] = evt.target.value);
   };
 

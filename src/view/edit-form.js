@@ -3,6 +3,7 @@ import { humanizePointDateAndTime } from '../utils.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import rangePlugin from 'flatpickr/dist/plugins/rangePlugin.js';
+import he from 'he';
 
 function createOfferListTemplate(offers, waypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === waypoint.type);
@@ -81,7 +82,7 @@ function createEditFormsTemplate(data) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${waypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination.name}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination.name)}" list="destination-list-2">
           <datalist id="destination-list-2">
           ${cityList}
           </datalist>
@@ -147,7 +148,7 @@ export default class EditFormView extends AbstractStatefulView {
 
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
-    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('keyup', this.#priceChangeHandler);
     this.element.querySelector('.event__available-offers').addEventListener('click', this.#offersChangeHnadler);
 
     this.#setDatepicker();
@@ -172,6 +173,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
+    evt.target.value = evt.target.value.replace(/[^\d]/g, '');
     this._setState(this._state.waypoint['base_price'] = evt.target.value);
   };
 
