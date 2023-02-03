@@ -2,21 +2,17 @@ import SortsView from '../view/sorts.js';
 import EventsView from '../view/event-list.js';
 import EventView from '../view/event.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
-import PointsModel from '../models/model.js';
+
 import EmptyEventsView from '../view/empty-events.js';
 import { offersByType, pointTypes, cities, destinations } from '../mock/mock-data.js';
 import PointPresenter from './point-presenter.js';
 import { sortDayDesc, sortTimeDesc, sortPriceDesc, filter } from '../utils.js';
 import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
-import FilterModel from '../models/filter-model.js';
+
 import FilterPresenter from './filter-presenter.js';
+import NewPointPresenter from './new-point-presenter.js';
 
-const tripControlsFilters = document.querySelector('.trip-controls__filters');
-const tripEvents = document.querySelector('.trip-events');
-const pointsModel = new PointsModel();
-const filtersModel = new FilterModel();
-
-class TripPresenter {
+export default class TripPresenter {
   #headerContainer = null;
   #mainContainer = null;
   #model = null;
@@ -24,6 +20,7 @@ class TripPresenter {
 
   #pointPresenters = new Map();
   #filterPresenter = null;
+  #newPointPresenter = null;
   #currentSortType = SortType.DEFAULT;
   #filterType = FilterType.EVERYTHING;
 
@@ -32,14 +29,19 @@ class TripPresenter {
   #sortComponent = null;
   #emptyEventsComponent = null;
 
-  constructor({ headerContainer, mainContainer, model, filterModel }) {
+  #handleNewPointDestroy = null;
+
+  constructor({ headerContainer, mainContainer, model, filterModel, onNewPointDestroy }) {
     this.#headerContainer = headerContainer;
     this.#mainContainer = mainContainer;
     this.#model = model;
     this.#filterModel = filterModel;
+    this.#handleNewPointDestroy = onNewPointDestroy;
 
     this.#model.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
+
+
   }
 
   get points() {
@@ -62,6 +64,25 @@ class TripPresenter {
 
   init() {
     this.#renderEventList();
+  }
+
+  createNewPoint() {
+    const newPointProps = {
+      types: pointTypes,
+      availableCities: cities,
+      offers: offersByType,
+      newDestinations: destinations
+    };
+
+    this.#newPointPresenter = new NewPointPresenter({
+      eventItem: this.#eventItem,
+      onDataChange: this.#handleViewAction,
+      onDestroy: this.#handleNewPointDestroy,
+    });
+
+    this.#currentSortType = SortType.DEFAULT;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init(newPointProps);
   }
 
   #renderFilters = () => {
@@ -90,6 +111,7 @@ class TripPresenter {
   };
 
   #handleModeChange = () => {
+    this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.setDefaultMode());
   };
 
@@ -165,7 +187,7 @@ class TripPresenter {
     }
 
     this.#filterPresenter.destroy();
-
+    this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
@@ -191,11 +213,4 @@ class TripPresenter {
   };
 }
 
-const tripPresenter = new TripPresenter({
-  headerContainer: tripControlsFilters,
-  mainContainer: tripEvents,
-  model: pointsModel,
-  filterModel: filtersModel,
-});
 
-tripPresenter.init();
