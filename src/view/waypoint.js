@@ -15,11 +15,11 @@ function createWaypointOffersTemplate(offers, waypoint) {
 }
 
 function createWaypointTemplate(offers, waypoint, destinations) {
-  const dateFrom = humanizePointDueDate(waypoint.date_from);
-  const timeTo = humanizePointTime(waypoint.date_to);
-  const timeFrom = humanizePointTime(waypoint.date_from);
-  const duration = calculateDuration(waypoint.date_from, waypoint.date_to);
-  const favoriteClassName = waypoint.is_favorite ? 'event__favorite-btn--active' : '';
+  const dateFrom = humanizePointDueDate(waypoint.dateFrom);
+  const timeTo = humanizePointTime(waypoint.dateTo);
+  const timeFrom = humanizePointTime(waypoint.dateFrom);
+  const duration = calculateDuration(waypoint.dateFrom, waypoint.dateTo);
+  const favoriteClassName = waypoint.isFavorite ? 'event__favorite-btn--active' : '';
   const offersTemplate = createWaypointOffersTemplate(offers, waypoint);
 
   const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
@@ -28,7 +28,7 @@ function createWaypointTemplate(offers, waypoint, destinations) {
   return (
     `<li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${waypoint.date_from}">${dateFrom}</time>
+        <time class="event__date" datetime="${waypoint.dateFrom}">${dateFrom}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${waypoint.type}.png" alt="Event type icon">
         </div>
@@ -42,7 +42,7 @@ function createWaypointTemplate(offers, waypoint, destinations) {
           <p class="event__duration">${duration}</p>
         </div>
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${waypoint.base_price}</span>
+          &euro;&nbsp;<span class="event__price-value">${waypoint.basePrice}</span>
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">

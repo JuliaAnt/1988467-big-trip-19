@@ -1,12 +1,20 @@
 import TripPresenter from './presenters/main-presenter.js';
 import PointsModel from './models/model.js';
 import FilterModel from './models/filter-model.js';
+import WaypointApiService from './waypoint-api-service.js';
+
+const AUTHORIZATION = 'Basic hskdufgh7sdfgjhksd';
+const END_POINT = 'https://19.ecmascript.pages.academy/big-trip';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
-const pointsModel = new PointsModel();
-const filtersModel = new FilterModel();
 const newEventButton = document.querySelector('.trip-main__event-add-btn');
+
+const pointsModel = new PointsModel({
+  waypointsApiService: new WaypointApiService(END_POINT, AUTHORIZATION)
+});
+const filtersModel = new FilterModel();
+
 
 const tripPresenter = new TripPresenter({
   headerContainer: tripControlsFilters,

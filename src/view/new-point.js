@@ -7,12 +7,12 @@ import { nanoid } from 'nanoid';
 import he from 'he';
 
 const BLANK_POINT = {
-  'base_price': '',
-  'date_from': '2023-01-01T00:00:00.000Z',
-  'date_to': '2023-01-01T00:00:00.000Z',
+  'basePrice': '',
+  'dateFrom': '2023-01-01T00:00:00.000Z',
+  'dateTo': '2023-01-01T00:00:00.000Z',
   'destination': '',
   'id': nanoid(),
-  'is_favorite': false,
+  'isFavorite': false,
   'offers': [],
   'type': '',
 };
@@ -76,8 +76,8 @@ function createNewPointTemplate(data) {
   const typeList = createTypeListTemplate(types, newWaypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, newWaypoint);
-  const dateFrom = humanizePointDateAndTime(newWaypoint.date_from);
-  const dateTo = humanizePointDateAndTime(newWaypoint.date_to);
+  const dateFrom = humanizePointDateAndTime(newWaypoint.dateFrom);
+  const dateTo = humanizePointDateAndTime(newWaypoint.dateTo);
   const descriptionDest = createDestinationTemplate(newWaypoint, newDestinations);
   const pointDestination = newDestinations.find((destinationToFind) => newWaypoint.destination === destinationToFind.id);
 
@@ -122,7 +122,7 @@ function createNewPointTemplate(data) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${newWaypoint.base_price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${newWaypoint.basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -190,7 +190,7 @@ export default class NewPointView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
     evt.target.value = evt.target.value.replace(/[^\d]/g, '');
-    this._setState(this._state.newWaypoint['base_price'] = evt.target.value);
+    this._setState(this._state.newWaypoint.basePrice = evt.target.value);
   };
 
   #offersChangeHandler = (evt) => {
@@ -246,8 +246,8 @@ export default class NewPointView extends AbstractStatefulView {
 
   #dateChangeHandler = ([dateFrom, dateTo]) => {
     this.updateElement(
-      this._state.newWaypoint['date_from'] = dateFrom,
-      this._state.newWaypoint['date_to'] = dateTo
+      this._state.newWaypoint.dateFrom = dateFrom,
+      this._state.newWaypoint.dateTo = dateTo
     );
   };
 

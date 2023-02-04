@@ -44,19 +44,19 @@ const getRandomPositiveInteger = (a, b) => {
 };
 
 function sortDayDesc(waypointA, waypointB) {
-  const dateA = new Date(waypointA.date_from);
-  const dateB = new Date(waypointB.date_from);
+  const dateA = new Date(waypointA.dateFrom);
+  const dateB = new Date(waypointB.dateFrom);
   return dateA - dateB;
 }
 
 function sortTimeDesc(waypointA, waypointB) {
-  const durationA = new Date(waypointA.date_to) - new Date(waypointA.date_from);
-  const durationB = new Date(waypointB.date_to) - new Date(waypointB.date_from);
+  const durationA = new Date(waypointA.dateTo) - new Date(waypointA.dateFrom);
+  const durationB = new Date(waypointB.dateTo) - new Date(waypointB.dateFrom);
   return durationB - durationA;
 }
 
 function sortPriceDesc(waypointA, waypointB) {
-  return waypointB.base_price - waypointA.base_price;
+  return waypointB.basePrice - waypointA.basePrice;
 }
 
 function isDatesEqual(dateWaypoint, dateUpdate) {
@@ -68,16 +68,16 @@ function isPriceEqual(priceWaypoint, priceUpdate) {
 }
 
 function isDurationEqual(waypoint, update) {
-  const durationWaypoint = new Date(waypoint.date_to) - new Date(waypoint.date_from);
-  const durationUpdate = new Date(update.date_to) - new Date(update.date_from);
+  const durationWaypoint = new Date(waypoint.dateTo) - new Date(waypoint.dateFrom);
+  const durationUpdate = new Date(update.dateTo) - new Date(update.dateFrom);
   return durationWaypoint === durationUpdate ? true : (durationWaypoint === null && durationUpdate === null);
 }
 
 const filter = {
   [FilterType.EVERYTHING]: (points) => points.filter((point) => !point.isArchive),
-  [FilterType.FUTURE]: (points) => points.filter((point) => Date.parse(point['date_from']) > Date.now()),
-  [FilterType.PRESENT]: (points) => points.filter((point) => Date.parse(point['date_from']) <= Date.now() && Date.parse(point['date_to']) >= Date.now()),
-  [FilterType.PAST]: (points) => points.filter((point) => Date.parse(point['date_to']) < Date.now())
+  [FilterType.FUTURE]: (points) => points.filter((point) => Date.parse(point.dateFrom) > Date.now()),
+  [FilterType.PRESENT]: (points) => points.filter((point) => Date.parse(point.dateFrom) <= Date.now() && Date.parse(point.dateTo) >= Date.now()),
+  [FilterType.PAST]: (points) => points.filter((point) => Date.parse(point.dateTo) < Date.now())
 };
 
 export { getRandomArrayElement, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime, sortDayDesc, sortTimeDesc, sortPriceDesc, isDatesEqual, isPriceEqual, isDurationEqual, filter };

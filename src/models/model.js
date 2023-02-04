@@ -6,6 +6,16 @@ const NUMBER_OF_EVENTS = 3;
 
 export default class PointsModel extends Observable {
   #points = [];
+  #waypointsApiService = null;
+
+  constructor({ waypointsApiService }) {
+    super();
+    this.#waypointsApiService = waypointsApiService;
+
+    this.#waypointsApiService.waypoints.then((waypoints) => {
+      console.log(waypoints);
+    });
+  }
 
   get points() {
     const uniqueMap = {};

@@ -55,8 +55,8 @@ function createEditFormsTemplate(data) {
   const typeList = createTypeListTemplate(types, waypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, waypoint);
-  const dateFrom = humanizePointDateAndTime(waypoint.date_from);
-  const dateTo = humanizePointDateAndTime(waypoint.date_to);
+  const dateFrom = humanizePointDateAndTime(waypoint.dateFrom);
+  const dateTo = humanizePointDateAndTime(waypoint.dateTo);
   const descriptionDest = createDestinationTemplate(waypoint, destinations);
   const pointDestination = destinations.find((destinationToFind) => waypoint.destination === destinationToFind.id);
 
@@ -101,7 +101,7 @@ function createEditFormsTemplate(data) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${waypoint.base_price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${waypoint.basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -174,7 +174,7 @@ export default class EditFormView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
     evt.target.value = evt.target.value.replace(/[^\d]/g, '');
-    this._setState(this._state.waypoint['base_price'] = evt.target.value);
+    this._setState(this._state.waypoint.basePrice = evt.target.value);
   };
 
   #offersChangeHnadler = (evt) => {
@@ -241,8 +241,8 @@ export default class EditFormView extends AbstractStatefulView {
 
   #dateChangeHandler = ([dateFrom, dateTo]) => {
     this.updateElement(
-      this._state.waypoint['date_from'] = dateFrom,
-      this._state.waypoint['date_to'] = dateTo
+      this._state.waypoint.dateFrom = dateFrom,
+      this._state.waypoint.dateTo = dateTo
     );
   };
 

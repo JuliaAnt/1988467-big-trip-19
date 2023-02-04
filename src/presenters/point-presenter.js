@@ -106,7 +106,7 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = (waypoint) => {
-    const updatedPoint = { ...waypoint, ['is_favorite']: !waypoint.is_favorite };
+    const updatedPoint = { ...waypoint, isFavorite: !waypoint.isFavorite };
 
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
@@ -116,8 +116,8 @@ export default class PointPresenter {
   };
 
   #handleEditSubmit = (update) => {
-    const isMinorUpdate = !isDatesEqual(this.#props.waypoint['date_from'], update['date_from']) ||
-      !isPriceEqual(this.#props.waypoint['base_price'], update['base_price']) ||
+    const isMinorUpdate = !isDatesEqual(this.#props.waypoint.dateFrom, update.dateFrom) ||
+      !isPriceEqual(this.#props.waypoint.basePrice, update.basePrice) ||
       !isDurationEqual(this.#props.waypoint, update);
 
     this.#handleDataChange(
