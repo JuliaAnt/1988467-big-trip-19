@@ -190,7 +190,7 @@ export default class NewPointView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
     evt.target.value = evt.target.value.replace(/[^\d]/g, '');
-    this._setState(this._state.newWaypoint.basePrice = evt.target.value);
+    this._setState(this._state.newWaypoint.basePrice = +evt.target.value);
   };
 
   #offersChangeHandler = (evt) => {

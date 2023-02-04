@@ -174,7 +174,7 @@ export default class EditFormView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
     evt.target.value = evt.target.value.replace(/[^\d]/g, '');
-    this._setState(this._state.waypoint.basePrice = evt.target.value);
+    this._setState(this._state.waypoint.basePrice = +evt.target.value);
   };
 
   #offersChangeHnadler = (evt) => {
