@@ -2,9 +2,8 @@ import SortsView from '../view/sorts.js';
 import EventsView from '../view/event-list.js';
 import EventView from '../view/event.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
-
+import LoadingView from '../view/loading.js';
 import EmptyEventsView from '../view/empty-events.js';
-import { offersByType, pointTypes, cities, destinations } from '../mock/mock-data.js';
 import PointPresenter from './point-presenter.js';
 import { sortDayDesc, sortTimeDesc, sortPriceDesc, filter } from '../utils.js';
 import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
@@ -23,12 +22,13 @@ export default class TripPresenter {
   #newPointPresenter = null;
   #currentSortType = SortType.DEFAULT;
   #filterType = FilterType.EVERYTHING;
+  #isLoading = true;
 
   #eventList = new EventsView();
   #eventItem = new EventView();
   #sortComponent = null;
   #emptyEventsComponent = null;
-
+  #loadingComponent = new LoadingView();
   #handleNewPointDestroy = null;
 
   constructor({ headerContainer, mainContainer, model, filterModel, onNewPointDestroy }) {
@@ -40,15 +40,12 @@ export default class TripPresenter {
 
     this.#model.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
-
-
   }
 
   get points() {
     this.#filterType = this.#filterModel.filter;
     const points = this.#model.points;
     const filteredPoints = filter[this.#filterType](points);
-
 
     switch (this.#currentSortType) {
       case SortType.TIME_DESC:
@@ -68,10 +65,10 @@ export default class TripPresenter {
 
   createNewPoint() {
     const newPointProps = {
-      types: pointTypes,
-      availableCities: cities,
-      offers: offersByType,
-      newDestinations: destinations
+      types: this.#model.pointTypes,
+      availableCities: this.#model.cities,
+      offers: this.#model.offersByType,
+      newDestinations: this.#model.destinations
     };
 
     this.#newPointPresenter = new NewPointPresenter({
@@ -110,6 +107,10 @@ export default class TripPresenter {
     render(this.#sortComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
   };
 
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
+  };
+
   #handleModeChange = () => {
     this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.setDefaultMode());
@@ -118,7 +119,7 @@ export default class TripPresenter {
   #handlePointChange = (updatedPoint) => {
     const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
     const { types, availableCities, offers } = pointPresenter.props;
-    pointPresenter.init({ types, availableCities, offers, destinations, waypoint: updatedPoint });
+    pointPresenter.init({ types, availableCities, offers, destinations: this.#model.destinations, waypoint: updatedPoint });
   };
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -148,6 +149,10 @@ export default class TripPresenter {
         this.#clearEventList({ resetSortType: true });
         this.#renderEventList();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderEventList();
     }
   };
 
@@ -170,10 +175,10 @@ export default class TripPresenter {
     points.forEach((waypoint) => {
       const props = {
         waypoint,
-        types: pointTypes,
-        availableCities: cities,
-        offers: offersByType,
-        destinations: destinations,
+        types: this.#model.pointTypes,
+        availableCities: this.#model.cities,
+        offers: this.#model.offersByType,
+        destinations: this.#model.destinations,
       };
       this.#renderPoint(props);
     });
@@ -181,6 +186,7 @@ export default class TripPresenter {
 
   #clearEventList = ({ resetSortType = false } = {}) => {
     remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if (this.#emptyEventsComponent) {
       remove(this.#emptyEventsComponent);
@@ -197,6 +203,11 @@ export default class TripPresenter {
   };
 
   #renderEventList = () => {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     this.#renderFilters();
 
     const points = this.points;

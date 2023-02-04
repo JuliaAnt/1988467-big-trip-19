@@ -15,7 +15,6 @@ const pointsModel = new PointsModel({
 });
 const filtersModel = new FilterModel();
 
-
 const tripPresenter = new TripPresenter({
   headerContainer: tripControlsFilters,
   mainContainer: tripEvents,
@@ -36,3 +35,4 @@ function handleNewPointFormClose() {
 newEventButton.addEventListener('click', handleNewPointButtonClick);
 
 tripPresenter.init();
+pointsModel.init();

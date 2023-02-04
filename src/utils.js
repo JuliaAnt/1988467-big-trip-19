@@ -30,19 +30,6 @@ function calculateDuration(dateFrom, dateTo) {
   return humanizeDuration;
 }
 
-const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
-
-const getRandomPositiveInteger = (a, b) => {
-  if (a < 0 || b < 0) {
-    return NaN;
-  }
-
-  const min = Math.ceil(Math.min(a, b));
-  const max = Math.floor(Math.max(a, b));
-
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
 function sortDayDesc(waypointA, waypointB) {
   const dateA = new Date(waypointA.dateFrom);
   const dateB = new Date(waypointB.dateFrom);
@@ -80,4 +67,4 @@ const filter = {
   [FilterType.PAST]: (points) => points.filter((point) => Date.parse(point.dateTo) < Date.now())
 };
 
-export { getRandomArrayElement, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime, sortDayDesc, sortTimeDesc, sortPriceDesc, isDatesEqual, isPriceEqual, isDurationEqual, filter };
+export { humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime, sortDayDesc, sortTimeDesc, sortPriceDesc, isDatesEqual, isPriceEqual, isDurationEqual, filter };
