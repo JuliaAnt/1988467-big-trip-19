@@ -3,12 +3,13 @@ import { humanizePointDateAndTime } from '../utils.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import rangePlugin from 'flatpickr/dist/plugins/rangePlugin.js';
+import he from 'he';
 
 function createOfferListTemplate(offers, waypoint) {
   const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === waypoint.type);
 
   return pointTypeOffer.offers.map((offer) => (
-    `<div class="event__offer-selector">
+    `<div class="event__offer-selector" data-offer-id="${offer.id}">
       <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${waypoint.offers.includes(offer.id) ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offer-meal-1">
         <span class="event__offer-title">${offer.title}</span>
@@ -81,7 +82,7 @@ function createEditFormsTemplate(data) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${waypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${pointDestination.name}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination.name)}" list="destination-list-2">
           <datalist id="destination-list-2">
           ${cityList}
           </datalist>
@@ -104,7 +105,10 @@ function createEditFormsTemplate(data) {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -124,23 +128,28 @@ function createEditFormsTemplate(data) {
 export default class EditFormView extends AbstractStatefulView {
   #handleEditSubmit = null;
   #handleEditReset = null;
+  #handleDeleteClick = null;
   #datepicker = null;
 
-  constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset }) {
+  constructor({ waypoint, types, availableCities, offers, destinations, onEditSubmit, onEditReset, onDeleteClick }) {
     super();
     this._setState(EditFormView.parsePointToState({ waypoint, types, availableCities, offers, destinations }));
     this.#handleEditSubmit = onEditSubmit;
     this.#handleEditReset = onEditReset;
+    this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
   }
 
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#editSubmitHandler);
-    this.element.addEventListener('reset', this.#editResetHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editResetHandler);
+    this.element.addEventListener('reset', this.#deleteClickHandler);
 
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('keyup', this.#priceChangeHandler);
+    this.element.querySelector('.event__available-offers').addEventListener('click', this.#offersChangeHnadler);
 
     this.#setDatepicker();
   }
@@ -162,6 +171,32 @@ export default class EditFormView extends AbstractStatefulView {
       ) : '');
   };
 
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    evt.target.value = evt.target.value.replace(/[^\d]/g, '');
+    this._setState(this._state.waypoint['base_price'] = evt.target.value);
+  };
+
+  #offersChangeHnadler = (evt) => {
+    const target = evt.target.closest('.event__offer-selector');
+
+    if (!target) {
+      return;
+    }
+
+    evt.preventDefault();
+    const offerId = +target.dataset.offerId;
+    const index = this._state.waypoint.offers.findIndex((offer) => offer === offerId);
+
+    if (index === -1) {
+      this._state.waypoint.offers.push(offerId);
+    } else {
+      this._state.waypoint.offers.splice(index, 1);
+    }
+
+    this.updateElement(this._state.waypoint.offers);
+  };
+
   get template() {
     return createEditFormsTemplate(this._state);
   }
@@ -174,12 +209,17 @@ export default class EditFormView extends AbstractStatefulView {
 
   #editSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditSubmit(EditFormView.parseStateToPoint(this._state));
+    this.#handleEditSubmit(EditFormView.parseStateToPoint(this._state.waypoint));
   };
 
   #editResetHandler = (evt) => {
     evt.preventDefault();
     this.#handleEditReset(EditFormView.parseStateToPoint(this._state));
+  };
+
+  #deleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(EditFormView.parseStateToPoint(this._state));
   };
 
   static parsePointToState(waypoint) {

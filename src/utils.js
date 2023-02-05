@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { FilterType } from './const';
 
 const DATE_FORMAT = 'MMM D';
 const TIME_FORMAT = 'HH:mm';
@@ -42,10 +43,6 @@ const getRandomPositiveInteger = (a, b) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-function updateItem(items, update) {
-  return items.splice(items.findIndex((item) => item.id === update.id), 1, update);
-}
-
 function sortDayDesc(waypointA, waypointB) {
   const dateA = new Date(waypointA.date_from);
   const dateB = new Date(waypointB.date_from);
@@ -62,4 +59,25 @@ function sortPriceDesc(waypointA, waypointB) {
   return waypointB.base_price - waypointA.base_price;
 }
 
-export { getRandomArrayElement, updateItem, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime, sortDayDesc, sortTimeDesc, sortPriceDesc };
+function isDatesEqual(dateWaypoint, dateUpdate) {
+  return dateWaypoint === dateUpdate ? true : (dateWaypoint === null && dateUpdate === null);
+}
+
+function isPriceEqual(priceWaypoint, priceUpdate) {
+  return priceWaypoint === priceUpdate ? true : (priceWaypoint === null && priceUpdate === null);
+}
+
+function isDurationEqual(waypoint, update) {
+  const durationWaypoint = new Date(waypoint.date_to) - new Date(waypoint.date_from);
+  const durationUpdate = new Date(update.date_to) - new Date(update.date_from);
+  return durationWaypoint === durationUpdate ? true : (durationWaypoint === null && durationUpdate === null);
+}
+
+const filter = {
+  [FilterType.EVERYTHING]: (points) => points.filter((point) => !point.isArchive),
+  [FilterType.FUTURE]: (points) => points.filter((point) => Date.parse(point['date_from']) > Date.now()),
+  [FilterType.PRESENT]: (points) => points.filter((point) => Date.parse(point['date_from']) <= Date.now() && Date.parse(point['date_to']) >= Date.now()),
+  [FilterType.PAST]: (points) => points.filter((point) => Date.parse(point['date_to']) < Date.now())
+};
+
+export { getRandomArrayElement, getRandomPositiveInteger, humanizePointDueDate, humanizePointTime, calculateDuration, humanizePointDateAndTime, sortDayDesc, sortTimeDesc, sortPriceDesc, isDatesEqual, isPriceEqual, isDurationEqual, filter };

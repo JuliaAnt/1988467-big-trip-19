@@ -1,18 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-
-const SortType = {
-  DEFAULT: 'default',
-  PRICE_DESC: 'price-desc',
-  TIME_DESC: 'time-desc',
-};
-
-const SortNames = ['day', 'event', 'time', 'price', 'offer'];
-
-const TYPE_SORT_MAP = {
-  day: SortType.DEFAULT,
-  time: SortType.TIME_DESC,
-  price: SortType.PRICE_DESC
-};
+import { SortType, SortNames, TYPE_SORT_MAP } from '../const.js';
 
 function createSortListTemplate(currentSortType) {
   return SortNames.map((sortName) => {
