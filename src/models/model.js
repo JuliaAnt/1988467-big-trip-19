@@ -72,11 +72,7 @@ export default class PointsModel extends Observable {
     try {
       const response = await this.#waypointsApiService.updateWaypoint(update);
       const updateWaypoint = this.#adaptToClient(response);
-      this.#points = [
-        ...this.#points.slice(0, index),
-        updateWaypoint,
-        ...this.#points.slice(index + 1),
-      ];
+      this.#points.splice(index, 1, updateWaypoint);
 
       this._notify(updateType, update);
     } catch {
@@ -85,25 +81,19 @@ export default class PointsModel extends Observable {
   }
 
   addPoint(updateType, update) {
-    this.#points = [
-      update,
-      ...this.#points,
-    ];
+    this.#points.push(update);
 
     this._notify(updateType, update);
   }
 
   deletePoint(updateType, update) {
-    const index = this.#points.findIndex((point) => point.id === update.waypoint.id);
+    const filteredPoints = this.#points.filter((point) => point.id !== update.waypoint.id);
 
-    if (index === -1) {
+    if (this.#points.length === filteredPoints.length) {
       throw new Error('Can\'t delete unexisting point');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1),
-    ];
+    this.#points = filteredPoints;
 
     this._notify(updateType);
   }
