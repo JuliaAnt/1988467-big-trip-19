@@ -3,6 +3,7 @@ import NewPointView from '../view/new-point.js';
 import { UserAction, UpdateType } from '../const.js';
 
 export default class NewPointPresenter {
+  #eventList = null;
   #eventItem = null;
   #handleDataChange = null;
   #handleDestroy = null;
@@ -11,7 +12,8 @@ export default class NewPointPresenter {
 
   #newEventComponent = null;
 
-  constructor({ eventItem, onDataChange, onDestroy, onNewEventAdd }) {
+  constructor({ eventList, eventItem, onDataChange, onDestroy, onNewEventAdd }) {
+    this.#eventList = eventList;
     this.#eventItem = eventItem;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
@@ -31,6 +33,7 @@ export default class NewPointPresenter {
       onNewEventReset: this.#handleDeleteClick
     });
 
+    render(this.#eventItem, this.#eventList.element, RenderPosition.AFTERBEGIN);
     render(this.#newEventComponent, this.#eventItem.element, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -43,6 +46,7 @@ export default class NewPointPresenter {
 
     this.#handleDestroy();
 
+    remove(this.#eventItem);
     remove(this.#newEventComponent);
     this.#newEventComponent = null;
 
@@ -60,12 +64,14 @@ export default class NewPointPresenter {
 
   #handleDeleteClick = () => {
     this.destroy();
+    remove(this.#eventList);
   };
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.destroy();
+      remove(this.#eventList);
     }
   };
 }

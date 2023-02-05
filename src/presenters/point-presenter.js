@@ -3,6 +3,7 @@ import EditFormView from '../view/edit-form.js';
 import WaypointView from '../view/waypoint.js';
 import { UserAction, UpdateType } from '../const.js';
 import { isDatesEqual, isPriceEqual, isDurationEqual } from '../utils.js';
+import EventView from '../view/event.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -10,6 +11,7 @@ const Mode = {
 };
 
 export default class PointPresenter {
+  #eventList = null;
   #pointListContainer = null;
   #pointListItem = null;
   #pointEditItem = null;
@@ -18,8 +20,8 @@ export default class PointPresenter {
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
 
-  constructor({ pointListContainer, onDataChange, onModeChange }) {
-    this.#pointListContainer = pointListContainer;
+  constructor({ eventList, onDataChange, onModeChange }) {
+    this.#eventList = eventList;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
@@ -48,7 +50,10 @@ export default class PointPresenter {
     });
 
     if (prevPointListItem === null || prevPointEditItem === null) {
-      return render(this.#pointListItem, this.#pointListContainer);
+      this.#pointListContainer = new EventView();
+      render(this.#pointListContainer, this.#eventList);
+      render(this.#pointListItem, this.#pointListContainer.element);
+      return;
     }
 
     if (this.#mode === Mode.DEFAULT) {
@@ -64,6 +69,7 @@ export default class PointPresenter {
   }
 
   destroy() {
+    remove(this.#pointListContainer);
     remove(this.#pointListItem);
     remove(this.#pointEditItem);
   }

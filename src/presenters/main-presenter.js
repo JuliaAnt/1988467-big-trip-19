@@ -72,6 +72,8 @@ export default class TripPresenter {
     };
 
     this.#newPointPresenter = new NewPointPresenter({
+      mainContainer: this.#mainContainer,
+      eventList: this.#eventList,
       eventItem: this.#eventItem,
       onDataChange: this.#handleViewAction,
       onDestroy: this.#handleNewPointDestroy,
@@ -79,6 +81,11 @@ export default class TripPresenter {
 
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+
+    if (this.points.length === 0) {
+      render(this.#eventList, this.#mainContainer, RenderPosition.AFTERBEGIN);
+    }
+
     this.#newPointPresenter.init(newPointProps);
   }
 
@@ -163,7 +170,7 @@ export default class TripPresenter {
 
   #renderPoint = (props) => {
     const pointPresenter = new PointPresenter({
-      pointListContainer: this.#eventItem.element,
+      eventList: this.#eventList.element,
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange
     });
@@ -219,7 +226,6 @@ export default class TripPresenter {
 
     this.#renderSort();
     render(this.#eventList, this.#mainContainer);
-    render(this.#eventItem, this.#eventList.element);
     this.#renderPoints(this.points);
   };
 }

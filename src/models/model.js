@@ -34,8 +34,8 @@ export default class PointsModel extends Observable {
 
   get pointTypes() {
     const pointTypes = new Set();
-    this.#points.map((point) => {
-      pointTypes.add(point.type);
+    this.#offersByType.map((offer) => {
+      pointTypes.add(offer.type);
     });
     return Array.from(pointTypes);
   }
@@ -43,14 +43,20 @@ export default class PointsModel extends Observable {
   async init() {
     try {
       const waypoints = await this.#waypointsApiService.waypoints;
+
+      this.#points = waypoints.map(this.#adaptToClient);
+    } catch {
+      this.#points = [];
+    }
+
+    try {
       const destinations = await this.#waypointsApiService.destinations;
       const offersByType = await this.#waypointsApiService.offersByType;
 
-      this.#points = waypoints.map(this.#adaptToClient);
       this.#destinations = destinations;
       this.#offersByType = offersByType;
     } catch {
-      this.#points = [];
+      throw new Error('Failed to download additional data from the server');
     }
 
     this._notify(UpdateType.INIT);
