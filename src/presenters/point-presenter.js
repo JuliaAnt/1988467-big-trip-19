@@ -167,7 +167,6 @@ export default class PointPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update
     );
-    // this.#replaceEditToWaypoint();
   };
 
   #handleEditReset = () => {

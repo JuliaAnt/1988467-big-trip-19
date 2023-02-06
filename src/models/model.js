@@ -8,7 +8,7 @@ export default class PointsModel extends Observable {
   #waypointsApiService = null;
   #isLoadingError = false;
 
-  constructor({ waypointsApiService }) {
+  constructor(waypointsApiService) {
     super();
     this.#waypointsApiService = waypointsApiService;
   }
@@ -26,18 +26,12 @@ export default class PointsModel extends Observable {
   }
 
   get cities() {
-    const cities = new Set();
-    this.#destinations.map((destination) => {
-      cities.add(destination.name);
-    });
+    const cities = new Set(this.#destinations.map(({ name }) => name));
     return Array.from(cities);
   }
 
   get pointTypes() {
-    const pointTypes = new Set();
-    this.#offersByType.map((offer) => {
-      pointTypes.add(offer.type);
-    });
+    const pointTypes = new Set(this.#offersByType.map(({ type }) => type));
     return Array.from(pointTypes);
   }
 
@@ -100,9 +94,11 @@ export default class PointsModel extends Observable {
 
   async deletePoint(updateType, update) {
     try {
-      await this.#waypointsApiService.deleteWaypoint(update);
+      if (!await this.#waypointsApiService.deleteWaypoint(update)) {
+        throw new Error('Can\'t delete waypoint');
+      }
 
-      const filteredPoints = this.#points.filter((point) => point.id !== update.waypoint.id);
+      const filteredPoints = this.#points.filter(({ id }) => id !== update.waypoint.id);
 
       if (this.#points.length === filteredPoints.length) {
         throw new Error('Can\'t delete unexisting point');
@@ -111,8 +107,8 @@ export default class PointsModel extends Observable {
       this.#points = filteredPoints;
 
       this._notify(updateType);
-    } catch {
-      throw new Error('Can\'t delete waypoint');
+    } catch (err) {
+      throw new Error(err.message);
     }
   }
 

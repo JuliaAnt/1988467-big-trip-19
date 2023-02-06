@@ -10,9 +10,8 @@ const tripControlsFilters = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
 const newEventButton = document.querySelector('.trip-main__event-add-btn');
 
-const pointsModel = new PointsModel({
-  waypointsApiService: new WaypointApiService(END_POINT, AUTHORIZATION)
-});
+const waypointsApiService = new WaypointApiService(END_POINT, AUTHORIZATION);
+const pointsModel = new PointsModel(waypointsApiService);
 const filtersModel = new FilterModel();
 
 const tripPresenter = new TripPresenter({
