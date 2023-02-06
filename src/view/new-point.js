@@ -2,28 +2,26 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizePointDateAndTime } from '../utils.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import rangePlugin from 'flatpickr/dist/plugins/rangePlugin.js';
-import { nanoid } from 'nanoid';
 import he from 'he';
 
 const BLANK_POINT = {
-  'base_price': '',
-  'date_from': '2023-01-01T00:00:00.000Z',
-  'date_to': '2023-01-01T00:00:00.000Z',
+  'basePrice': '',
+  'dateFrom': Date.now(),
+  'dateTo': Date.now(),
   'destination': '',
-  'id': nanoid(),
-  'is_favorite': false,
+  'id': '',
+  'isFavorite': false,
   'offers': [],
   'type': '',
 };
 
-function createOfferListTemplate(offers, newWaypoint) {
+function createOfferListTemplate(offers, newWaypoint, isDisabled) {
   if (newWaypoint.type) {
     const pointTypeOffer = offers.find((offerToFind) => offerToFind.type === newWaypoint.type);
 
     return pointTypeOffer.offers.map((offer) => (
       `<div class="event__offer-selector" data-offer-id="${offer.id}">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${newWaypoint.offers.includes(offer.id) ? 'checked' : ''}>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal" ${newWaypoint.offers.includes(offer.id) ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
         <label class="event__offer-label" for="event-offer-meal-1">
           <span class="event__offer-title">${offer.title}</span>
           &plus;&euro;&nbsp;
@@ -36,10 +34,10 @@ function createOfferListTemplate(offers, newWaypoint) {
   }
 }
 
-function createTypeListTemplate(types, newWaypoint) {
+function createTypeListTemplate(types, newWaypoint, isDisabled) {
   return types.map((type) => (
     `<div class="event__type-item">
-      <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${newWaypoint.type === type ? 'checked' : ''}>
+      <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${newWaypoint.type === type ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
       <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
     </div>`
   )).join('');
@@ -72,12 +70,12 @@ function createDestinationTemplate(newWaypoint, newDestinations) {
 }
 
 function createNewPointTemplate(data) {
-  const { newWaypoint, types, availableCities, offers, newDestinations } = data;
+  const { newWaypoint, types, availableCities, offers, newDestinations, isDisabled, isSaving } = data;
   const typeList = createTypeListTemplate(types, newWaypoint);
   const cityList = createCityListTemplate(availableCities);
   const offerList = createOfferListTemplate(offers, newWaypoint);
-  const dateFrom = humanizePointDateAndTime(newWaypoint.date_from);
-  const dateTo = humanizePointDateAndTime(newWaypoint.date_to);
+  const dateFrom = humanizePointDateAndTime(newWaypoint.dateFrom);
+  const dateTo = humanizePointDateAndTime(newWaypoint.dateTo);
   const descriptionDest = createDestinationTemplate(newWaypoint, newDestinations);
   const pointDestination = newDestinations.find((destinationToFind) => newWaypoint.destination === destinationToFind.id);
 
@@ -103,7 +101,7 @@ function createNewPointTemplate(data) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${newWaypoint.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination ? pointDestination.name : '')}" list="destination-list-2">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination ? pointDestination.name : '')}" list="destination-list-2" ${isDisabled ? 'disabled' : ''}>
           <datalist id="destination-list-2">
           ${(cityList)}
           </datalist>
@@ -111,10 +109,10 @@ function createNewPointTemplate(data) {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom}" ${isDisabled ? 'disabled' : ''}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo}" ${isDisabled ? 'disabled' : ''}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -122,11 +120,11 @@ function createNewPointTemplate(data) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${newWaypoint.base_price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${newWaypoint.basePrice}" ${isDisabled ? 'disabled' : ''}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>Cancel</button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -144,7 +142,8 @@ function createNewPointTemplate(data) {
 }
 
 export default class NewPointView extends AbstractStatefulView {
-  #datepicker = null;
+  #datepickerFrom = null;
+  #datepickerTo = null;
   #handleNewEventReset = null;
   #handleNewEventSubmit = null;
 
@@ -181,6 +180,10 @@ export default class NewPointView extends AbstractStatefulView {
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
 
+    if (!this._state.availableCities.includes(evt.target.value)) {
+      evt.target.setCustomValidity('Выберите город из списка.');
+    }
+
     this._state.newDestinations.find((destinationItem) => destinationItem.name === evt.target.value ?
       this.updateElement(
         this._state.newWaypoint.destination = destinationItem.id
@@ -190,7 +193,7 @@ export default class NewPointView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
     evt.target.value = evt.target.value.replace(/[^\d]/g, '');
-    this._setState(this._state.newWaypoint['base_price'] = evt.target.value);
+    this._setState(this._state.newWaypoint.basePrice = +evt.target.value);
   };
 
   #offersChangeHandler = (evt) => {
@@ -228,26 +231,43 @@ export default class NewPointView extends AbstractStatefulView {
   };
 
   static parsePointToState(newWaypoint) {
-    return { ...newWaypoint };
+    return {
+      ...newWaypoint,
+      isDisabled: false,
+      isSaving: false,
+    };
   }
 
   static parseStateToPoint(state) {
+    delete state.isDisabled;
+    delete state.isSaving;
+
     return { ...state };
   }
 
   removeElement() {
     super.removeElement();
 
-    if (this.#datepicker) {
-      this.#datepicker.destroy();
-      this.#datepicker = null;
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
     }
   }
 
-  #dateChangeHandler = ([dateFrom, dateTo]) => {
+  #dateFromChangeHandler = (dateFrom) => {
     this.updateElement(
-      this._state.newWaypoint['date_from'] = dateFrom,
-      this._state.newWaypoint['date_to'] = dateTo
+      this._state.newWaypoint.dateFrom = dateFrom,
+    );
+  };
+
+  #dateToChangeHandler = (dateTo) => {
+    this.updateElement(
+      this._state.newWaypoint.dateTo = dateTo,
     );
   };
 
@@ -255,13 +275,24 @@ export default class NewPointView extends AbstractStatefulView {
     const dateFrom = this.element.querySelector('#event-start-time-1');
     const dateTo = this.element.querySelector('#event-end-time-1');
 
-    this.#datepicker = flatpickr(
+    this.#datepickerFrom = flatpickr(
       dateFrom,
       {
         enableTime: true,
         dateFormat: 'd/m/y H:i',
-        plugins: [new rangePlugin({ input: dateTo })],
-        onChange: this.#dateChangeHandler,
+        'time_24hr': true,
+        onChange: this.#dateFromChangeHandler,
+      }
+    );
+
+    this.#datepickerTo = flatpickr(
+      dateTo,
+      {
+        enableTime: true,
+        dateFormat: 'd/m/y H:i',
+        'time_24hr': true,
+        minDate: this._state.newWaypoint.dateFrom,
+        onChange: this.#dateToChangeHandler,
       }
     );
   }

@@ -3,6 +3,7 @@ import EditFormView from '../view/edit-form.js';
 import WaypointView from '../view/waypoint.js';
 import { UserAction, UpdateType } from '../const.js';
 import { isDatesEqual, isPriceEqual, isDurationEqual } from '../utils.js';
+import EventView from '../view/event.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -10,6 +11,7 @@ const Mode = {
 };
 
 export default class PointPresenter {
+  #eventList = null;
   #pointListContainer = null;
   #pointListItem = null;
   #pointEditItem = null;
@@ -18,8 +20,8 @@ export default class PointPresenter {
   #handleModeChange = null;
   #mode = Mode.DEFAULT;
 
-  constructor({ pointListContainer, onDataChange, onModeChange }) {
-    this.#pointListContainer = pointListContainer;
+  constructor({ eventList, onDataChange, onModeChange }) {
+    this.#eventList = eventList;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
@@ -48,7 +50,10 @@ export default class PointPresenter {
     });
 
     if (prevPointListItem === null || prevPointEditItem === null) {
-      return render(this.#pointListItem, this.#pointListContainer);
+      this.#pointListContainer = new EventView();
+      render(this.#pointListContainer, this.#eventList);
+      render(this.#pointListItem, this.#pointListContainer.element);
+      return;
     }
 
     if (this.#mode === Mode.DEFAULT) {
@@ -56,14 +61,51 @@ export default class PointPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#pointEditItem, prevPointEditItem);
+      replace(this.#pointListItem, prevPointEditItem);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevPointListItem);
     remove(prevPointEditItem);
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditItem.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditItem.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointListItem.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditItem.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditItem.shake(resetFormState);
+  }
+
   destroy() {
+    remove(this.#pointListContainer);
     remove(this.#pointListItem);
     remove(this.#pointEditItem);
   }
@@ -106,7 +148,7 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = (waypoint) => {
-    const updatedPoint = { ...waypoint, ['is_favorite']: !waypoint.is_favorite };
+    const updatedPoint = { ...waypoint, isFavorite: !waypoint.isFavorite };
 
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
@@ -116,8 +158,8 @@ export default class PointPresenter {
   };
 
   #handleEditSubmit = (update) => {
-    const isMinorUpdate = !isDatesEqual(this.#props.waypoint['date_from'], update['date_from']) ||
-      !isPriceEqual(this.#props.waypoint['base_price'], update['base_price']) ||
+    const isMinorUpdate = !isDatesEqual(this.#props.waypoint.dateFrom, update.dateFrom) ||
+      !isPriceEqual(this.#props.waypoint.basePrice, update.basePrice) ||
       !isDurationEqual(this.#props.waypoint, update);
 
     this.#handleDataChange(
@@ -125,8 +167,6 @@ export default class PointPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update
     );
-
-    this.#replaceEditToWaypoint();
   };
 
   #handleEditReset = () => {

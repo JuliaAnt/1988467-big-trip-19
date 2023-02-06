@@ -8,6 +8,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 const SortType = {
@@ -31,6 +32,10 @@ const FilterType = {
   PAST: 'past',
 };
 
+const TimeLimit = {
+  LOWER_LIMIT: 150,
+  UPPER_LIMIT: 1000,
+};
 
-export { SortType, SortNames, TYPE_SORT_MAP, UserAction, UpdateType, FilterType };
+export { SortType, SortNames, TYPE_SORT_MAP, UserAction, UpdateType, FilterType, TimeLimit };
 
