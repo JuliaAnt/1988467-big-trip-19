@@ -1,20 +1,16 @@
 import dayjs from 'dayjs';
-import { FilterType } from './const';
-
-const DATE_FORMAT = 'MMM D';
-const TIME_FORMAT = 'HH:mm';
-const DATE_TIME_FORMAT = 'DD/MM/YY HH:mm';
+import { FilterType, FormatType } from './const';
 
 function humanizePointDueDate(dueDate) {
-  return dueDate ? dayjs(dueDate).format(DATE_FORMAT) : '';
+  return dueDate ? dayjs(dueDate).format(FormatType.DATE_FORMAT) : '';
 }
 
 function humanizePointTime(dueDate) {
-  return dueDate ? dayjs(dueDate).format(TIME_FORMAT) : '';
+  return dueDate ? dayjs(dueDate).format(FormatType.TIME_FORMAT) : '';
 }
 
 function humanizePointDateAndTime(dueDate) {
-  return dueDate ? dayjs(dueDate).format(DATE_TIME_FORMAT) : '';
+  return dueDate ? dayjs(dueDate).format(FormatType.DATE_TIME_FORMAT) : '';
 }
 
 function calculateDuration(dateFrom, dateTo) {

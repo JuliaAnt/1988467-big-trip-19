@@ -11,7 +11,7 @@ const tripEvents = document.querySelector('.trip-events');
 const newEventButton = document.querySelector('.trip-main__event-add-btn');
 
 const waypointsApiService = new WaypointApiService(END_POINT, AUTHORIZATION);
-const pointsModel = new PointsModel(waypointsApiService);
+const pointsModel = new PointsModel({ waypointsApiService, onNewPointDestroy: handleNewPointDisabled });
 const filtersModel = new FilterModel();
 
 const tripPresenter = new TripPresenter({
@@ -24,6 +24,10 @@ const tripPresenter = new TripPresenter({
 
 function handleNewPointButtonClick() {
   tripPresenter.createNewPoint();
+  handleNewPointDisabled();
+}
+
+function handleNewPointDisabled() {
   newEventButton.disabled = true;
 }
 

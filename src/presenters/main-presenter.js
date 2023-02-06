@@ -130,7 +130,6 @@ export default class TripPresenter {
   };
 
   #handleModeChange = () => {
-    this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.setDefaultMode());
   };
 
@@ -230,7 +229,6 @@ export default class TripPresenter {
     }
 
     this.#filterPresenter.destroy();
-    this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
