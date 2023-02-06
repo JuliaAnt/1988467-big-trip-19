@@ -6,10 +6,11 @@ import LoadingView from '../view/loading.js';
 import EmptyEventsView from '../view/empty-events.js';
 import PointPresenter from './point-presenter.js';
 import { sortDayDesc, sortTimeDesc, sortPriceDesc, filter } from '../utils.js';
-import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
-
+import { SortType, UpdateType, UserAction, FilterType, TimeLimit } from '../const.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import FilterPresenter from './filter-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
+import LoadingErrorView from '../view/loading-error.js';
 
 export default class TripPresenter {
   #headerContainer = null;
@@ -29,7 +30,13 @@ export default class TripPresenter {
   #sortComponent = null;
   #emptyEventsComponent = null;
   #loadingComponent = new LoadingView();
+  #loadingErrorComponent = new LoadingErrorView();
   #handleNewPointDestroy = null;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({ headerContainer, mainContainer, model, filterModel, onNewPointDestroy }) {
     this.#headerContainer = headerContainer;
@@ -72,7 +79,7 @@ export default class TripPresenter {
     };
 
     this.#newPointPresenter = new NewPointPresenter({
-      mainContainer: this.#mainContainer,
+      pointsCount: this.points.length,
       eventList: this.#eventList,
       eventItem: this.#eventItem,
       onDataChange: this.#handleViewAction,
@@ -118,6 +125,10 @@ export default class TripPresenter {
     render(this.#loadingComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
   };
 
+  #renderLoadingError = () => {
+    render(this.#loadingErrorComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
+  };
+
   #handleModeChange = () => {
     this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.setDefaultMode());
@@ -129,18 +140,37 @@ export default class TripPresenter {
     pointPresenter.init({ types, availableCities, offers, destinations: this.#model.destinations, waypoint: updatedPoint });
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#model.updatePoint(updateType, update);
+        this.#pointPresenters.get(update.id).setSaving();
+        try {
+          await this.#model.updatePoint(updateType, update);
+        } catch (err) {
+          this.#pointPresenters.get(update.id).setAborting();
+        }
         break;
       case UserAction.ADD_POINT:
-        this.#model.addPoint(updateType, update);
+        this.#newPointPresenter.setSaving();
+        try {
+          await this.#model.addPoint(updateType, update);
+        } catch (err) {
+          this.#newPointPresenter.setAborting();
+        }
         break;
       case UserAction.DELETE_POINT:
-        this.#model.deletePoint(updateType, update);
+        this.#pointPresenters.get(update.waypoint.id).setDeleting();
+        try {
+          this.#model.deletePoint(updateType, update);
+        } catch (err) {
+          this.#pointPresenters.get(update.waypoint.id).setAborting();
+        }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -212,6 +242,11 @@ export default class TripPresenter {
   #renderEventList = () => {
     if (this.#isLoading) {
       this.#renderLoading();
+      return;
+    }
+
+    if (this.#model.loadingError) {
+      this.#renderLoadingError();
       return;
     }
 

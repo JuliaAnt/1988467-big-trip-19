@@ -6,6 +6,7 @@ export default class PointsModel extends Observable {
   #destinations = [];
   #offersByType = [];
   #waypointsApiService = null;
+  #isLoadingError = false;
 
   constructor({ waypointsApiService }) {
     super();
@@ -40,6 +41,10 @@ export default class PointsModel extends Observable {
     return Array.from(pointTypes);
   }
 
+  get loadingError() {
+    return this.#isLoadingError;
+  }
+
   async init() {
     try {
       const waypoints = await this.#waypointsApiService.waypoints;
@@ -56,7 +61,7 @@ export default class PointsModel extends Observable {
       this.#destinations = destinations;
       this.#offersByType = offersByType;
     } catch {
-      throw new Error('Failed to download additional data from the server');
+      this.#isLoadingError = true;
     }
 
     this._notify(UpdateType.INIT);
@@ -80,22 +85,35 @@ export default class PointsModel extends Observable {
     }
   }
 
-  addPoint(updateType, update) {
-    this.#points.push(update);
+  async addPoint(updateType, update) {
+    try {
+      const response = await this.#waypointsApiService.addWaypoint(update);
+      const newWaypoint = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#points.push(newWaypoint);
+
+      this._notify(updateType, newWaypoint);
+    } catch {
+      throw new Error('Can\'t add waypoint');
+    }
   }
 
-  deletePoint(updateType, update) {
-    const filteredPoints = this.#points.filter((point) => point.id !== update.waypoint.id);
+  async deletePoint(updateType, update) {
+    try {
+      await this.#waypointsApiService.deleteWaypoint(update);
 
-    if (this.#points.length === filteredPoints.length) {
-      throw new Error('Can\'t delete unexisting point');
+      const filteredPoints = this.#points.filter((point) => point.id !== update.waypoint.id);
+
+      if (this.#points.length === filteredPoints.length) {
+        throw new Error('Can\'t delete unexisting point');
+      }
+
+      this.#points = filteredPoints;
+
+      this._notify(updateType);
+    } catch {
+      throw new Error('Can\'t delete waypoint');
     }
-
-    this.#points = filteredPoints;
-
-    this._notify(updateType);
   }
 
   #adaptToClient = (waypoint) => {

@@ -3,21 +3,21 @@ import NewPointView from '../view/new-point.js';
 import { UserAction, UpdateType } from '../const.js';
 
 export default class NewPointPresenter {
+  #pointsCount = null;
   #eventList = null;
   #eventItem = null;
   #handleDataChange = null;
   #handleDestroy = null;
-  #handleNewEventAdd = null;
   #newPointProps = null;
 
   #newEventComponent = null;
 
-  constructor({ eventList, eventItem, onDataChange, onDestroy, onNewEventAdd }) {
+  constructor({ pointsCount, eventList, eventItem, onDataChange, onDestroy }) {
+    this.#pointsCount = pointsCount;
     this.#eventList = eventList;
     this.#eventItem = eventItem;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
-    this.#handleNewEventAdd = onNewEventAdd;
   }
 
   init(newPointProps) {
@@ -28,7 +28,6 @@ export default class NewPointPresenter {
 
     this.#newEventComponent = new NewPointView({
       ...this.#newPointProps,
-      onNewEventAdd: this.#handleNewEventAdd,
       onNewEventSubmit: this.#handleFormSubmit,
       onNewEventReset: this.#handleDeleteClick
     });
@@ -53,25 +52,51 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
+  setSaving() {
+    this.#newEventComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#newEventComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#newEventComponent.shake(resetFormState);
+  }
+
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
-      { ...point },
+      point,
     );
+
     this.destroy();
   };
 
   #handleDeleteClick = () => {
     this.destroy();
-    remove(this.#eventList);
+
+    if (this.#pointsCount === 0) {
+      remove(this.#eventList);
+    }
   };
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.destroy();
-      remove(this.#eventList);
+
+      if (this.#pointsCount === 0) {
+        remove(this.#eventList);
+      }
     }
   };
 }

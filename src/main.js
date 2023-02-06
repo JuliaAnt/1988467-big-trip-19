@@ -3,7 +3,7 @@ import PointsModel from './models/model.js';
 import FilterModel from './models/filter-model.js';
 import WaypointApiService from './waypoint-api-service.js';
 
-const AUTHORIZATION = 'Basic hskdufgh7sdfgjhksd';
+const AUTHORIZATION = 'Basic hskdufgh7sdfgjhksb';
 const END_POINT = 'https://19.ecmascript.pages.academy/big-trip';
 
 const tripControlsFilters = document.querySelector('.trip-controls__filters');
