@@ -37,5 +37,12 @@ const TimeLimit = {
   UPPER_LIMIT: 1000,
 };
 
-export { SortType, SortNames, TYPE_SORT_MAP, UserAction, UpdateType, FilterType, TimeLimit };
+
+const FormatType = {
+  DATE_FORMAT: 'MMM D',
+  TIME_FORMAT: 'HH:mm',
+  DATE_TIME_FORMAT: 'DD/MM/YY HH:mm',
+};
+
+export { SortType, SortNames, TYPE_SORT_MAP, UserAction, UpdateType, FilterType, TimeLimit, FormatType };
 

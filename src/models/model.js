@@ -7,10 +7,12 @@ export default class PointsModel extends Observable {
   #offersByType = [];
   #waypointsApiService = null;
   #isLoadingError = false;
+  #handleNewPointFormClose = null;
 
-  constructor(waypointsApiService) {
+  constructor({ waypointsApiService, onNewPointDestroy }) {
     super();
     this.#waypointsApiService = waypointsApiService;
+    this.#handleNewPointFormClose = onNewPointDestroy;
   }
 
   get points() {
@@ -56,6 +58,7 @@ export default class PointsModel extends Observable {
       this.#offersByType = offersByType;
     } catch {
       this.#isLoadingError = true;
+      this.#handleNewPointFormClose();
     }
 
     this._notify(UpdateType.INIT);

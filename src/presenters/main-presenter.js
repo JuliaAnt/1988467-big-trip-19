@@ -11,6 +11,7 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import FilterPresenter from './filter-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import LoadingErrorView from '../view/loading-error.js';
+import HeadlineView from '../view/headline.js';
 
 export default class TripPresenter {
   #headerContainer = null;
@@ -32,6 +33,7 @@ export default class TripPresenter {
   #loadingComponent = new LoadingView();
   #loadingErrorComponent = new LoadingErrorView();
   #handleNewPointDestroy = null;
+  #headlineComponent = null;
 
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -96,6 +98,17 @@ export default class TripPresenter {
     this.#newPointPresenter.init(newPointProps);
   }
 
+  #renderHeadline = () => {
+    const tripMainContainer = document.querySelector('.trip-main');
+    this.#headlineComponent = new HeadlineView({
+      waypoints: this.#model.points,
+      destinations: this.#model.destinations,
+      offers: this.#model.offersByType,
+    });
+
+    render(this.#headlineComponent, tripMainContainer, RenderPosition.AFTERBEGIN);
+  };
+
   #renderFilters = () => {
     this.#filterPresenter = new FilterPresenter({
       filterContainer: this.#headerContainer,
@@ -130,7 +143,6 @@ export default class TripPresenter {
   };
 
   #handleModeChange = () => {
-    this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.setDefaultMode());
   };
 
@@ -177,6 +189,8 @@ export default class TripPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#handlePointChange(data);
+        remove(this.#headlineComponent);
+        this.#renderHeadline();
         break;
       case UpdateType.MINOR:
         this.#clearEventList();
@@ -224,13 +238,13 @@ export default class TripPresenter {
   #clearEventList = ({ resetSortType = false } = {}) => {
     remove(this.#sortComponent);
     remove(this.#loadingComponent);
+    remove(this.#headlineComponent);
 
     if (this.#emptyEventsComponent) {
       remove(this.#emptyEventsComponent);
     }
 
     this.#filterPresenter.destroy();
-    this.#handleNewPointDestroy();
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
@@ -250,6 +264,7 @@ export default class TripPresenter {
       return;
     }
 
+    this.#renderHeadline();
     this.#renderFilters();
 
     const points = this.points;
