@@ -1,11 +1,13 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { humanizePointDueDate, sortDayDesc } from '../utils.js';
 
+const COUNT_OF_CITIES_IN_HEADLINE = 3;
+
 function createHeadlineCitiesTemplate(sortedPoints, destinations) {
   const sortedCities = [];
   const modifiedPoints = sortedPoints.slice();
 
-  if (modifiedPoints.length > 3) {
+  if (modifiedPoints.length > COUNT_OF_CITIES_IN_HEADLINE) {
     modifiedPoints.splice(1, sortedPoints.length - 2);
   }
 
@@ -14,7 +16,7 @@ function createHeadlineCitiesTemplate(sortedPoints, destinations) {
   });
 
   return (
-    `<h1 class="trip-info__title">${sortedCities.length < 3 ? sortedCities.join('&nbsp;&mdash;&nbsp;...&nbsp;&mdash;&nbsp;') : sortedCities.join('&nbsp;&mdash;&nbsp;')}</h1>`
+    `<h1 class="trip-info__title">${sortedCities.length < COUNT_OF_CITIES_IN_HEADLINE ? sortedCities.join('&nbsp;&mdash;&nbsp;...&nbsp;&mdash;&nbsp;') : sortedCities.join('&nbsp;&mdash;&nbsp;')}</h1>`
   );
 }
 
